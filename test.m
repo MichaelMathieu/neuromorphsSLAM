@@ -13,5 +13,5 @@ for iobs = 1:size(obstacles, 1)
 end
 
 global robot = initRobot(0.9, 0.1, -0.4, obstacles);
-tick(@callback, 3)
+tick(@callback, 10)
 #waitforbuttonpress

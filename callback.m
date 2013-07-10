@@ -5,6 +5,8 @@ function callback()
   drawLine(robot.x, robot.y, robot.x+dx, robot.y+dy, 'blue')
   robot.x += dx;
   robot.y += dy;
+
+  
   
   border = 0.05;
   for iobs = 1:size(robot.obstacles, 1)
@@ -35,8 +37,12 @@ function robot = obstacleAvoidance(obstacle, robot, border)
 	       if p2 >= 0
 		  p3 = cos(robot.theta)*nx + sin(robot.theta)*ny;
 		  if p3 <= 0
-		    p4 = cos(robot.theta)*(x2-x1) + sin(robot.theta)*(y2-y1);
-		    robot.theta += sign(p4) * 0.2 * pi;
+		    if d <= 1.1*robot.velocity % We are too close ! emergency ! Follow the normal
+		       robot.theta = atan2(ny, nx)
+		    else
+		      p4 = cos(robot.theta)*(x2-x1) + sin(robot.theta)*(y2-y1);
+		      robot.theta += sign(p4) * 0.2 * pi;
+		    end
 		  end
 	       end
 	    end
