@@ -12,7 +12,7 @@ function callback()
   for iobs = 1:size(robot.obstacles, 1)
       robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
   end
-  robot.theta += normrnd(0, 0.02);
+  robot.theta += normrnd(0, robot.noise);
 end
 
 function robot = obstacleAvoidance(obstacle, robot, border)
