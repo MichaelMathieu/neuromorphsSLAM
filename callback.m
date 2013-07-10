@@ -5,38 +5,11 @@ function callback()
   drawLine(robot.x, robot.y, robot.x+dx, robot.y+dy, 'blue')
   robot.x += dx;
   robot.y += dy;
-  %robot.x, robot.y
   
-  #robot.theta = mod(robot.theta, 2*pi);
   border = 0.05;
-  ## if robot.y < border
-  ##   if dy < 0
-  ##     robot.theta += sign(dx)*0.2*pi;
-  ##   end
-  ## end
-  ## if robot.x < border
-  ##   if dx < 0
-  ##     robot.theta -= sign(dy)*0.2*pi;
-  ##   end
-  ## end
-  ## if robot.y > 1-border
-  ##    if dy > 0
-  ## 	robot.theta -= sign(dx)*0.2*pi;
-  ##    end
-  ## end
-  ## if robot.x > 1-border
-  ##   if dx > 0
-  ##     robot.theta += sign(dy)*0.2*pi;
-  ##   end
-  ## end
-  robot = obstacleAvoidance([0,0,1,0],robot,border);
-  robot = obstacleAvoidance([1,0,1,1],robot,border);
-  robot = obstacleAvoidance([1,1,0,1],robot,border);
-  robot = obstacleAvoidance([0,1,0,0],robot,border);
-  robot = obstacleAvoidance([0.2, 0.2, 0.2, 0.8], robot, border);
-  robot = obstacleAvoidance([0.2, 0.8, 0.8, 0.8], robot, border);
-  robot = obstacleAvoidance([0.8, 0.8, 0.8, 0.2], robot, border);
-  robot = obstacleAvoidance([0.8, 0.2, 0.2, 0.2], robot, border);
+  for iobs = 1:size(robot.obstacles, 1)
+      robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
+  end
   robot.theta += normrnd(0, 0.02);
 end
 
