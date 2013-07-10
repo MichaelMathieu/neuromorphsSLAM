@@ -27,8 +27,10 @@ function robot = obstacleAvoidance(obstacle, robot, border)
 	 ny = x2-x1;
 	 d = abs(a*robot.x+b*robot.y+c)/norm;
 	 if d < border
-	    p = (robot.x-x1)*(x2-x1) + (robot.y-y1)*(y2-y1);
-	    if (p > -border) & (p < norm+border)
+	    rx = robot.x-x1;
+	    ry = robot.y-y1;
+	    p = (rx*(x2-x1) + ry*(y2-y1)) / norm;
+	    if (p > -border/2) & (p < norm+border/2)
 	       p2 = (robot.x-x1)*nx + (robot.y-y1)*ny;
 	       if p2 >= 0
 		  p3 = cos(robot.theta)*nx + sin(robot.theta)*ny;
