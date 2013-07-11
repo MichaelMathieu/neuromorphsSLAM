@@ -1,5 +1,12 @@
 function callback(dt)
   global robot;
+  % Update robot position
+  border = 0.05;
+  for iobs = 1:size(robot.obstacles, 1)
+      robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
+  end
+  robot.theta = robot.theta + randn() * robot.noise;
+
   dx = robot.velocity*dt*cos(robot.theta);
   dy = robot.velocity*dt*sin(robot.theta);
   figure(1);
@@ -7,6 +14,7 @@ function callback(dt)
   robot.x = robot.x + dx;
   robot.y = robot.y + dy;
 
+  % Update VCO and neurons, at faster rate
   nSubIters = 100;
   potentials = zeros(size(robot.VCO, 2), robot.nNeuronsPerVCO, nSubIters);
   v = [dx/nSubIters, dy/nSubIters];
@@ -19,48 +27,13 @@ function callback(dt)
       end
     end
   end
-  
+  % Display neuron outputs
   figure(2);
   for i = 1:size(robot.VCO,2)
       subplot(robot.nNeuronsPerVCO/2, 2, i);
       plot(reshape(potentials(i,1,:), nSubIters));
       title(["(" num2str(robot.VCO(i).d(1)) " " num2str(robot.VCO(i).d(2)) ")"])
-  end
-  
-  if 0 %debug curves     
-    figure(2);
-    global debugVCO;
-    %[robot.VCO(1,1), phi] = fakeVCOUpdate(robot.VCO(1,1), [dx,, dt, robot.velocity);
-    n = size(debugVCO,2)+1
-    debugVCO(1, n) = size(debugVCO,2);
-    debugVCO(2, n) = phi(1);
-    debugVCO(6, n) = phi(2);
-    dotp = dot(robot.VCO.d, [dx, dy]);
-    debugVCO(4, n) = robot.VCO.phase;
-    if dt ~= 0
-      debugVCO(3, n) = dotp/(robot.velocity*dt*norm(robot.VCO.d));
-      %derivative = (debugVCO(4, n) - debugVCO(4, n-1))/dt;
-      derivative = (atan2(debugVCO(2, n),debugVCO(6, n)) ...
-		    - atan2(debugVCO(2, n-1), debugVCO(6, n-1)))/dt;
-      derivative = mod(derivative, 2*pi);
-      debugVCO(5, n) = (derivative/0.2-dt*robot.VCO.Omega)/(dt*norm(robot.VCO.d));
-      if (debugVCO(5, n) < -1.2) | (debugVCO(5, n) > 1.2)
-	debugVCO(5, n) = debugVCO(5, n-1);
-      end
-      debugVCO(5, n) = max(-1, min(debugVCO(5, n), 1))
-      subplot(2,1,1); plot(debugVCO(1,:), debugVCO(2,:), 'Color', 'blue', ...
-			   debugVCO(1,:), debugVCO(6,:), 'Color', 'red');
-      subplot(2,1,2); plot(debugVCO(1,:), debugVCO(3,:),'Color', 'blue', ...
-			   debugVCO(1,:), debugVCO(5,:),'Color', 'red');
-    end
-  end
-  
-  
-  border = 0.05;
-  for iobs = 1:size(robot.obstacles, 1)
-      robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
-  end
-  robot.theta = robot.theta + randn() * robot.noise;
+  end  
 end
 
 function robot = obstacleAvoidance(obstacle, robot, border)

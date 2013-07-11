@@ -16,9 +16,6 @@ for iobs = 1:size(obstacles, 1)
     drawLine(obstacles(iobs, 1), obstacles(iobs, 2), obstacles(iobs, 3), obstacles(iobs, 4));
 end
 
-global debugVCO;
-debugVCO = [];
 global robot;
 robot = initRobot(0.9, 0.1, -pi/2, obstacles);
 tick(@callback, 10)
-%waitforbuttonpress
