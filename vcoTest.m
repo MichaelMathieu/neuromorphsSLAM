@@ -1,4 +1,4 @@
-vcoObj = vcoInit(4, 1, 0);
+
 
 % Time
 dt = 0.1;
@@ -18,11 +18,24 @@ for i = 1 : length(t)
     end
 end
 
+
+
 % VCOs 
+vcoObjs = [ vcoInit([1;0], 0, 8);
+            vcoInit([0;1], 0, 8);
+            vcoInit([-1;0], 0, 8);
+            vcoInit([0;-1], 0, 8); ];
+        
+
 Vco = [];
-for i=1 : length(t)        
-    [vcoObj, output] = vcoUpdate(vcoObj, dt, v(:,i));
-    Vco = [Vco output];
+for i=1 : length(t)
+    Output = []
+    for j = 1 : length(vcoObjs)
+        
+        [vcoObjs(j), output] = vcoUpdate(vcoObjs(j), dt, v(:,i));
+        Output = [Output ; output ];
+    end
+    Vco = [Vco Output];
 end
 
 % Plots
