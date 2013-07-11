@@ -7,8 +7,8 @@ function obj, V = lifUpdate(obj, I, dt)
 	     obj.V = obj.V_reset;
 	 end
 	 if obj.V > obj.V_th
-	    obj.V = obj.V_spike
-	    obj.ref = obj.abs_ref
+	    obj.V = obj.V_spike;
+	    obj.ref = obj.abs_ref;
 	 end
 	 V = obj.V;
 end
