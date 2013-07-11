@@ -7,30 +7,24 @@ function callback(dt)
   robot.x = robot.x + dx;
   robot.y = robot.y + dy;
 
-  global debugVCO
   nSubIters = 100;
+  potentials = zeros(size(robot.VCO, 2), robot.nNeuronsPerVCO, nSubIters);
   v = [dx/nSubIters, dy/nSubIters];
-  for iter = 0:(nSubIters-1)
-    n = size(debugVCO, 2)+1;
+  for iter = 1:nSubIters
     for i = 1:size(robot.VCO, 2)
       [robot.VCO(1,i), phi] = fakeVCOUpdate(robot.VCO(1,i), v, dt/nSubIters, robot.velocity);
       for j = 1:robot.nNeuronsPerVCO
 	[robot.VCOlif(i, j), V] = lifUpdate(robot.VCOlif(i,j), max(phi(j),0), dt/nSubIters);
-	if j == 1
-	  debugVCO(i, n) = V;
-	end
+	potentials(i, j, iter) = V;
       end
     end
   end
   
   figure(2);
-  for j = 1:robot.nNeuronsPerVCO
-      nVals = 500;
-      vMax = size(debugVCO,2);
-      vMin = max(1,vMax-nVals);
-      subplot(robot.nNeuronsPerVCO, 1, j);
-      plot(debugVCO(j,vMin:vMax));
-      title([num2str(robot.VCO(j).d(1)) " " num2str(robot.VCO(j).d(2))])
+  for i = 1:size(robot.VCO,2)
+      subplot(robot.nNeuronsPerVCO/2, 2, i);
+      plot(reshape(potentials(i,1,:), nSubIters));
+      title(["(" num2str(robot.VCO(i).d(1)) " " num2str(robot.VCO(i).d(2)) ")"])
   end
   
   if 0 %debug curves     
