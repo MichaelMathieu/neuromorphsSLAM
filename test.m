@@ -17,6 +17,6 @@ for iobs = 1:size(obstacles, 1)
 end
 
 global debugVCO = []
-global robot = initRobot(0.9, 0.1, pi/2, obstacles);
+global robot = initRobot(0.9, 0.1, -pi/2, obstacles);
 tick(@callback, 10)
 #waitforbuttonpress

@@ -7,22 +7,32 @@ function callback(dt)
   robot.x += dx;
   robot.y += dy;
 
-  figure(2);
-  global debugVCO
-  n = size(debugVCO, 2)+1
-  %for i = 1:size(robot.VCO, 2)
-  for i = 1:1 %TODO: for now, we only one one oscillator
-    [robot.VCO(1,i), phi] = fakeVCOUpdate(robot.VCO(1,i), [dx, dy], dt, robot.velocity);
+  if 1
+    global debugVCO
+    nSubIters = 100
+    v = [dx/nSubIters, dy/nSubIters];
+    for iter = 0:(nSubIters-1)
+      n = size(debugVCO, 2)+1;
+      %for i = 1:size(robot.VCO, 2)
+      for i = 1:1 %TODO: for now, we only one one oscillator
+	[robot.VCO(1,i), phi] = fakeVCOUpdate(robot.VCO(1,i), v, dt/nSubIters, robot.velocity);
+	for j = 1:robot.nNeuronsPerVCO
+	  [robot.VCOlif(i, j), V] = lifUpdate(robot.VCOlif(i,j), max(phi(j),0), dt/nSubIters);
+	  debugVCO(j, n) = V;
+	end
+      end
+    end
+    
+    figure(2);
     for j = 1:robot.nNeuronsPerVCO
-      [robot.VCOlif(i, j), V] = lifUpdate(robot.VCOlif(i,j), 2*(phi(j)+1), 0.001); %TODO: fix dt
-      debugVCO(j, n) = V;
       subplot(robot.nNeuronsPerVCO, 1, j); plot(debugVCO(j,:));
     end
   end
   
-  if 0 %debug curves
+  if 0 %debug curves     
     figure(2);
     global debugVCO;
+    %[robot.VCO(1,1), phi] = fakeVCOUpdate(robot.VCO(1,1), [dx,, dt, robot.velocity);
     n = size(debugVCO,2)+1
     debugVCO(1, n) = size(debugVCO,2);
     debugVCO(2, n) = phi(1);
