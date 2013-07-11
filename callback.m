@@ -4,12 +4,12 @@ function callback(dt)
   dy = robot.velocity*dt*sin(robot.theta);
   figure(1);
   drawLine(robot.x, robot.y, robot.x+dx, robot.y+dy, 'blue')
-  robot.x += dx;
-  robot.y += dy;
+  robot.x = robot.x + dx;
+  robot.y = robot.y + dy;
 
   if 1
     global debugVCO
-    nSubIters = 100
+    nSubIters = 100;
     v = [dx/nSubIters, dy/nSubIters];
     for iter = 0:(nSubIters-1)
       n = size(debugVCO, 2)+1;
@@ -39,10 +39,10 @@ function callback(dt)
     debugVCO(6, n) = phi(2);
     dotp = dot(robot.VCO.d, [dx, dy]);
     debugVCO(4, n) = robot.VCO.phase;
-    if dt != 0
+    if dt ~= 0
       debugVCO(3, n) = dotp/(robot.velocity*dt*norm(robot.VCO.d));
       %derivative = (debugVCO(4, n) - debugVCO(4, n-1))/dt;
-      derivative = (atan2(debugVCO(2, n),debugVCO(6, n))
+      derivative = (atan2(debugVCO(2, n),debugVCO(6, n)) ...
 		    - atan2(debugVCO(2, n-1), debugVCO(6, n-1)))/dt;
       derivative = mod(derivative, 2*pi);
       debugVCO(5, n) = (derivative/0.2-dt*robot.VCO.Omega)/(dt*norm(robot.VCO.d));
@@ -50,9 +50,9 @@ function callback(dt)
 	debugVCO(5, n) = debugVCO(5, n-1);
       end
       debugVCO(5, n) = max(-1, min(debugVCO(5, n), 1))
-      subplot(2,1,1); plot(debugVCO(1,:), debugVCO(2,:), 'Color', 'blue',
+      subplot(2,1,1); plot(debugVCO(1,:), debugVCO(2,:), 'Color', 'blue', ...
 			   debugVCO(1,:), debugVCO(6,:), 'Color', 'red');
-      subplot(2,1,2); plot(debugVCO(1,:), debugVCO(3,:),'Color', 'blue',
+      subplot(2,1,2); plot(debugVCO(1,:), debugVCO(3,:),'Color', 'blue', ...
 			   debugVCO(1,:), debugVCO(5,:),'Color', 'red');
     end
   end
@@ -62,7 +62,7 @@ function callback(dt)
   for iobs = 1:size(robot.obstacles, 1)
       robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
   end
-  robot.theta += normrnd(0, robot.noise);
+  robot.theta = robot.theta + randn() * robot.noise;
 end
 
 function robot = obstacleAvoidance(obstacle, robot, border)
@@ -82,16 +82,16 @@ function robot = obstacleAvoidance(obstacle, robot, border)
 	    rx = robot.x-x1;
 	    ry = robot.y-y1;
 	    p = (rx*(x2-x1) + ry*(y2-y1)) / norm;
-	    if (p > -border/2) & (p < norm+border/2)
+	    if (p > -border/2) && (p < norm+border/2)
 	       p2 = (robot.x-x1)*nx + (robot.y-y1)*ny;
 	       if p2 >= 0
 		  p3 = cos(robot.theta)*nx + sin(robot.theta)*ny;
 		  if p3 <= 0
 		    if d <= 1.1*robot.velocity % We are too close ! emergency ! Follow the normal
-		       robot.theta = atan2(ny, nx)
+		       robot.theta = atan2(ny, nx);
 		    else
 		      p4 = cos(robot.theta)*(x2-x1) + sin(robot.theta)*(y2-y1);
-		      robot.theta += sign(p4) * 0.2 * pi;
+		      robot.theta = robot.theta + sign(p4) * 0.2 * pi;
 		    end
 		  end
 	       end
