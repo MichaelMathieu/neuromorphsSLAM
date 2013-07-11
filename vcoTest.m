@@ -40,7 +40,7 @@ end
 
 % Plots
 figure(); 
-subplot(5,1,1), plot(t, pos), title('Position');
-subplot(5,1,2), plot(t, v), title('Velocity');
-subplot(5,1,3), plot(t, Vco), title('VCO phase');
+subplot(3,1,1), plot(t, pos), title('Position');
+subplot(3,1,2), plot(t, v), title('Velocity');
+subplot(3,1,3), plot(t, Vco), title('VCO phase');
 
