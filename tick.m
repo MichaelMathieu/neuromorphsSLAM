@@ -1,15 +1,17 @@
 function tick(cb, fps)
 	 waitTime = 1./(fps*24*3600);
-	 nextTick = now + waitTime;
 	 global stopTick = 0
-	 cb()
+	 lastTick = now;
+	 nextTick = lastTick + waitTime;
+	 cb(0);
 	 while !stopTick
 	       t = now;
 	       if t >= nextTick
-		 cb()
+		 cb((t-lastTick)*24*3600);
+		 lastTick = t;
 		 nextTick += waitTime;
 	       else
-		   pause(nextTick-t)
+		   pause(nextTick-t);
 	       end
 	 end
 end
