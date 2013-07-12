@@ -40,7 +40,7 @@ pcells2 = [];
 pcell2_w = 0.05;
 for i = 1 : ncells
     pcells = [pcells lif(1, 40 * rand, .5 * rand, 10 * rand) ];
-    pcells2 = [pcells2 lif(1, 40, .005, 10) ];
+    pcells2 = [pcells2 lif(1, 40, .5, 10) ];
 end
 
 
@@ -61,6 +61,32 @@ for i = 1 : length(t)
     end
 end
 
+L1L2_weights = 0.025*rand(length(pcells), length(pcells2));
+
+% Process the second layer of PCells updates
+pcell2_I = zeros(1, length(t));
+pcell2_V = zeros(length(pcells), length(t));
+for i = 1 : length(t)
+    for j = 1 : length(vcoObjs)
+%         for k = 1 : length(pcells)
+%             pcell2_i = 0
+%             for l = 1 : length(pcells2)
+%                 pcell2_i = max(0, L1L2_weights(k,l) * pcell_V(k,i);
+%             end
+
+%         end
+        for k_l2 = 1 : length(pcells2)
+            pcell2_i = 0;
+            for k_l1 = 1 : length(pcells)
+                pcell2_i = pcell2_i + max(0, L1L2_weights(k_l1,k_l2) * pcell_V(k_l1,i));
+            end
+            pcell2_I(i) =  pcell_i;
+            [pcells2(k_l2), pcell2_v] = lifUpdate(pcells2(k_l2), pcell2_i, dt);
+            pcell2_V(k_l2,i) =  pcell2_v;
+        end
+
+    end
+end
 
 
 
@@ -68,5 +94,5 @@ end
 figure();
 subplot(3,1,1), plot(t, pcell_I), title('Input Current');
 subplot(3,1,2), plot(t, pcell_V), title('Layer 1 random param LIF cells V trace');
-subplot(3,1,3), plot(t, pcell2_V), title('Layer 2 1:1 projection with low weight');
+subplot(3,1,3), plot(t, pcell2_V), title('Layer 2 fully connected projection with random weight');
 
