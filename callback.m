@@ -31,8 +31,9 @@ function callback(dt)
   figure(2);
   for i = 1:size(robot.VCO,2)
       subplot(robot.nNeuronsPerVCO/2, 2, i);
-      plot(reshape(potentials(i,1,:), nSubIters));
-      title(["(" num2str(robot.VCO(i).d(1)) " " num2str(robot.VCO(i).d(2)) ")"])
+%       plot(reshape(potentials(i,1,:), nSubIters));
+      plot(squeeze(potentials(i,1,:)));
+      title(['(' num2str(robot.VCO(i).d(1)) ' ' num2str(robot.VCO(i).d(2)) ')'])
   end  
 end
 
