@@ -1,7 +1,7 @@
 
 % Time
 dt = 0.001;
-t = 0:dt:1;
+t = dt:dt:1;
 
 % Rat Motion
 pos = [sin(t) + 2*t; zeros(1,length(t))];
@@ -39,7 +39,7 @@ pcells = [];
 pcells2 = [];
 pcell2_w = 0.05;
 for i = 1 : ncells
-    pcells = [pcells lif(1, 40 * rand, .5 * rand, 10 * rand) ];
+    pcells = [pcells lif(1, 40 * rand, .05 * rand, 10 * rand) ];
     pcells2 = [pcells2 lif(1, 40, .5, 10) ];
 end
 
@@ -54,27 +54,46 @@ for i = 1 : length(t)
             pcell_I(i) =  pcell_i;
             [pcells(k), pcell_v] = lifUpdate(pcells(k), pcell_i, dt);
             pcell_V(k,i) =  pcell_v;
-
-
         end
-
     end
 end
 
-L1L2_weights = 0.025*rand(length(pcells), length(pcells2));
+% Desired output
+desired_spike = zeros(length(pcells),length(t));
+for i = 1 : length(t)
+    for j = 1 : length(vcoObjs)
+        for k = 1 : length(pcells)
+            if i ==  (k * length(t) / length(pcells))
+                desired_spike(k,i) = 1;
+            else
+                desired_spike(k,i) = 0;
+            end
+        end
+    end
+end
+
+
+% Desired output
+input_spike = zeros(length(pcells),length(t));
+for i = 1 : length(t)
+    for j = 1 : length(vcoObjs)
+        for k = 1 : length(pcells)
+            if pcell_V(k,i) > 10
+                input_spike(k,i) = 1;
+            else
+                input_spike(k,i) = 0;
+            end
+        end
+    end
+end
+
+L1L2_weights = 0.015*rand(length(pcells), length(pcells2));
 
 % Process the second layer of PCells updates
 pcell2_I = zeros(1, length(t));
 pcell2_V = zeros(length(pcells), length(t));
 for i = 1 : length(t)
     for j = 1 : length(vcoObjs)
-%         for k = 1 : length(pcells)
-%             pcell2_i = 0
-%             for l = 1 : length(pcells2)
-%                 pcell2_i = max(0, L1L2_weights(k,l) * pcell_V(k,i);
-%             end
-
-%         end
         for k_l2 = 1 : length(pcells2)
             pcell2_i = 0;
             for k_l1 = 1 : length(pcells)
@@ -88,11 +107,13 @@ for i = 1 : length(t)
     end
 end
 
+% Compute desired spikes
 
 
 % Plots
 figure();
-subplot(3,1,1), plot(t, pcell_I), title('Input Current');
-subplot(3,1,2), plot(t, pcell_V), title('Layer 1 random param LIF cells V trace');
-subplot(3,1,3), plot(t, pcell2_V), title('Layer 2 fully connected projection with random weight');
-
+subplot(5,1,1), plot(t, pcell_I), title('Input Current');
+subplot(5,1,2), plot(t, pcell_V), title('Layer 1 random param LIF cells V trace');
+subplot(5,1,3), plot(t, pcell2_V), title('Layer 2 fully connected projection with random weight');
+subplot(5,1,4), plot(t, desired_spike), title('Desired Output');
+subplot(5,1,5), plot(t, input_spike), title('Input Spikes');
