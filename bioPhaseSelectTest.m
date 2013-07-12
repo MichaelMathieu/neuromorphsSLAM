@@ -1,8 +1,7 @@
 
-
 % Time
-dt = 0.1;
-t = 0:dt:10;
+dt = 0.001;
+t = 0:dt:1;
 
 % Rat Motion
 pos = [sin(t) + 2*t; zeros(1,length(t))];
@@ -32,36 +31,42 @@ for i=1 : length(t)
     Vco = [Vco Output];
 end
 
-% Phase selective cell
-% pcell = lif(1, 1, 5*dt, 10);
-% pcell_I = [];
-% pcell_V = [];
-% for i = 1 : length(t)
-%     for j = 1 : length(vcoObjs)
-%         pcell_i = max(0, Vco(j,i))
-%         pcell_I = [pcell_I  pcell_i];
-%         [pcell, pcell_v] = lifUpdate(pcell, pcell_i, dt);
-%         pcell_V = [pcell_V pcell_v];
-%     end
-% end
-pcell = lif(1, 1, 5*dt, 10);
-pcell_I = [];
-pcell_V = [];
+% Create a bunch of lif cells with different parameters and see if the
+% respond selectively to different phase offsets from the same VCO driven
+% input
+ncells = 10;
+pcells = [];
+pcells2 = [];
+pcell2_w = 0.05;
+for i = 1 : ncells
+    pcells = [pcells lif(1, 40 * rand, .5 * rand, 10 * rand) ];
+    pcells2 = [pcells2 lif(1, 40, .005, 10) ];
+end
+
+
+% Process the first layer of PCells updates
+pcell_I = zeros(1, length(t));
+pcell_V = zeros(length(pcells), length(t));
 for i = 1 : length(t)
     for j = 1 : length(vcoObjs)
-        pcell_i = 1
-        pcell_I = [pcell_I  pcell_i];
-        [pcell, pcell_v] = lifUpdate(pcell, pcell_i, dt);
-        pcell_V = [pcell_V pcell_v];
+        for k = 1 : length(pcells)
+        	pcell_i = max(0,Vco(j,i));
+            pcell_I(i) =  pcell_i;
+            [pcells(k), pcell_v] = lifUpdate(pcells(k), pcell_i, dt);
+            pcell_V(k,i) =  pcell_v;
+
+
+        end
+
     end
 end
 
 
+
+
 % Plots
 figure();
-subplot(5,1,1), plot(t, pos), title('Position');
-subplot(5,1,2), plot(t, v), title('Velocity');
-subplot(5,1,3), plot(t, Vco), title('VCO phase');
-subplot(5,1,4), plot(t, pcell_I), title('LIF cell I');
-subplot(5,1,5), plot(t, pcell_V), title('LIF cell response to phase modulated I');
+subplot(3,1,1), plot(t, pcell_I), title('Input Current');
+subplot(3,1,2), plot(t, pcell_V), title('Layer 1 random param LIF cells V trace');
+subplot(3,1,3), plot(t, pcell2_V), title('Layer 2 1:1 projection with low weight');
 
