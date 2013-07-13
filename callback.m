@@ -30,7 +30,6 @@ function callback(dt, total_time)
     end
   end
   % Display VCO neuron outputs
-<<<<<<< HEAD
   ## figure(2);
   ## for i = 1:size(robot.VCO,2)
   ##     subplot(1+robot.nNeuronsPerVCO/2, 2, i);
