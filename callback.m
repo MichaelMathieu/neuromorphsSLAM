@@ -1,15 +1,19 @@
 function callback(dt, total_time)
+
+  display_VCO = 1;
+  display_phases = 0;
+
   global robot;
   % Update robot position
-  % border = 0.05;
-  % for iobs = 1:size(robot.obstacles, 1)
-  %     robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
-  % end
+  border = 0.11;
+  for iobs = 1:size(robot.obstacles, 1)
+      robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
+  end
   robot.theta = robot.theta + randn() * robot.noise;
 
   dx = robot.velocity*dt*cos(robot.theta);
   dy = robot.velocity*dt*sin(robot.theta);
-  %robot.theta = robot.theta + pi/4;
+  %robot.theta = robot.theta + pi/2;
   drawLine(robot.x, robot.y, robot.x+dx, robot.y+dy, 1, 'blue')
   drawRefresh();
   robot.x = robot.x + dx;
@@ -30,20 +34,24 @@ function callback(dt, total_time)
     end
   end
   % Display VCO neuron outputs
-  ## figure(2);
-  ## for i = 1:size(robot.VCO,2)
-  ##     subplot(1+robot.nNeuronsPerVCO/2, 2, i);
-  ##     plot(reshape(potentials(i,1,:), nSubIters));
-  ##     title(["(" num2str(robot.VCO(i).d(1)) " " num2str(robot.VCO(i).d(2)) ")"])
-  ## end
+  if display_VCO
+     figure(2);
+     for i = 1:size(robot.VCO,2)
+       subplot(1+robot.nNeuronsPerVCO/2, 2, i);
+       plot(reshape(potentials(i,1,:), nSubIters));
+       title(["(" num2str(robot.VCO(i).d(1)) " " num2str(robot.VCO(i).d(2)) ")"])
+     end
+  end
   % Display VCO phase
-  figure(4);
-  phases = [];
-  for i = 1:size(robot.VCO,2)
-    phase = robot.VCO(i).phase;
-    phase = phase - robot.VCO(i).Omega * total_time;
-    phases(i) = phase;
-    subplot(1,4,i); polar(phase, 1, 'ko');
+  if display_phases
+    figure(4);
+    phases = [];
+    for i = 1:size(robot.VCO,2)
+      phase = robot.VCO(i).phase;
+      phase = phase - robot.VCO(i).Omega * total_time;
+      phases(i) = phase;
+      subplot(2,size(robot.VCO,2)/2,i); polar(phase, 1, 'ko');
+    end
   end
   
   % Update place cells
@@ -67,19 +75,20 @@ function callback(dt, total_time)
       placeCellsOutputs(j,i) = W;
     end
   end
-  %if length(placeCellsHist) > 0
-  %figure(2);
-  %hist(placeCellsHist,linspace(1,robot.nPlaceCells,robot.nPlaceCells));
-  % subplot(1+robot.nNeuronsPerVCO/2, 2, 5);
-  % plot(placeCellsOutputs(1,:))
-  % subplot(1+robot.nNeuronsPerVCO/2, 2, 6);
-  % plot(todisp);
-  %end
-  if size(spikes,1) > 0
-    figure(3);
-    scatter(spikes(:,1), spikes(:,2), (spikes(:,3)+1)*4, spikes(:,4:6));
-    axis([0,1,-.5,.5])
+  if display_VCO
+    figure(2);
+    subplot(1+robot.nNeuronsPerVCO/2, 2, 5);
+    plot(placeCellsOutputs(1,:))
+    subplot(1+robot.nNeuronsPerVCO/2, 2, 6);
+    plot(todisp);
   end
+  if size(spikes,1) > 0
+    figure(1);
+    hold on
+    scatter(spikes(:,1), spikes(:,2), (spikes(:,3)+1)*8, spikes(:,4:6));
+    axis([0,1,0,1])
+  end
+  refresh()
   
 
 end

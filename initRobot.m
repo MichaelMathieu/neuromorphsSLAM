@@ -4,7 +4,7 @@ function robot = initRobot(x, y, theta, obstacles)
 	 robot.theta = theta;
 	 robot.velocity = 0.1;
 	 robot.obstacles = obstacles;
-	 robot.noise = 0.3;
+	 robot.noise = 0.;
 	 robot.tick = 1;
 	 
 	 % VCO
@@ -23,31 +23,26 @@ function robot = initRobot(x, y, theta, obstacles)
 	 robot.VCOlif = reshape(robot.VCOlif, [size(robot.VCO, 2), robot.nNeuronsPerVCO]);
 	 
 	 % Place cells
-	 connec = [1,1,1,1;
-		   1,1,1,2;
-		   1,1,2,1;
-		   1,2,1,1;
-		   2,1,1,1;
-		   1,1,1,3;
-		   1,1,3,1;
-		   1,3,1,1;
-		   3,1,1,1;
-		   1,1,1,4;
-		   1,1,4,1;
-		   1,4,1,1;
-		   4,1,1,1];
-	 robot.nPlaceCells = size(connec,1);
+	 robot.nPlaceCells = 64;
+	 connec = zeros(robot.nPlaceCells, size(dirs,2));
 	 robot.placeCells = [];
 	 for i = 1:robot.nPlaceCells
+	   %while length(unique(connec(i,:))) ~= length(connec(i,:))
+	     for j = 1:size(dirs,2)
+	       connec(i,j) = ceil(rand()*robot.nNeuronsPerVCO);
+	     end
+	   %end
 	   robot.placeCells = [ robot.placeCells lif(1, 100, 0.005, 10)];
 	 end
+	 connec(1,:) = [1,1,1,1];
+	 connec(2,:) = [2,1,4,1];
+	 connec(3,:) = [3,1,3,1];
+	 connec(4,:) = [4,1,2,1];
 	 robot.wPlaceCells = zeros(robot.nPlaceCells, robot.nNeuronsPerVCO*size(dirs,2));
 	 for i = 1:robot.nPlaceCells;
 	   for j = 1:size(dirs,2)
-	     k = ceil(rand()*robot.nNeuronsPerVCO);
-	     %robot.wPlaceCells((j-1)*robot.nNeuronsPerVCO+k, i) = 1/50;
-	     %k = connec(i,j);
-	     robot.wPlaceCells(i, (j-1)*robot.nNeuronsPerVCO+k) = 1/100;
+	     k = connec(i,j);
+	     robot.wPlaceCells(i, (j-1)*robot.nNeuronsPerVCO+k) = 1/70;
 	   end
 	 end
 end

@@ -2,7 +2,6 @@ function obj = fakeVCOInit(d, n)
 % Creates the object for fake vco. d is the vco direction, n is the number of outputs
   obj.d = d;
   obj.phase = 0;
-  obj.A = 0.5;
   obj.alpha = 2*pi;
   obj.Omega = 8;
   obj.K = [];
