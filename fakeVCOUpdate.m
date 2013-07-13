@@ -1,8 +1,5 @@
 function [obj, out] = fakeVCOUpdate(obj, v, dt)
-  A = 0.5;
-  Omega = 15;
-  vmax = 0.01;
-  dx = A*(dt * norm(obj.d) * Omega + dot(v, obj.d)/vmax);
+  dx = dt * norm(obj.d) * obj.Omega + obj.alpha*dot(v, obj.d);
   obj.phase = obj.phase + dx;
   %out = sin(obj.phase + obj.K);
   out = H(obj.phase + obj.K, dx/dt);

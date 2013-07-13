@@ -1,15 +1,15 @@
-function callback(dt)
+function callback(dt, total_time)
   global robot;
   % Update robot position
-  ## border = 0.05;
-  ## for iobs = 1:size(robot.obstacles, 1)
-  ##     robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
-  ## end
-  robot.theta = robot.theta + randn() * robot.noise;
+  border = 0.05;
+  for iobs = 1:size(robot.obstacles, 1)
+      robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
+  end
+  #robot.theta = robot.theta + randn() * robot.noise;
 
   dx = robot.velocity*dt*cos(robot.theta);
   dy = robot.velocity*dt*sin(robot.theta);
-  robot.theta = robot.theta + pi/4;
+  %robot.theta = robot.theta + pi/4;
   drawLine(robot.x, robot.y, robot.x+dx, robot.y+dy, 1, 'blue')
   drawRefresh();
   robot.x = robot.x + dx;
@@ -36,6 +36,15 @@ function callback(dt)
   ##     plot(reshape(potentials(i,1,:), nSubIters));
   ##     title(["(" num2str(robot.VCO(i).d(1)) " " num2str(robot.VCO(i).d(2)) ")"])
   ## end
+  % Display VCO phase
+  figure(4);
+  phases = [];
+  for i = 1:size(robot.VCO,2)
+    phase = robot.VCO(i).phase;
+    phase = phase - robot.VCO(i).Omega * total_time;
+    phases(i) = phase;
+    subplot(1,4,i); polar(phase, 1, 'ko');
+  end
   
   % Update place cells
   %potentials = reshape(potentials, robot.nNeuronsPerVCO*size(robot.VCO,2), nSubIters);
@@ -59,8 +68,8 @@ function callback(dt)
     end
   end
   %if length(placeCellsHist) > 0
-    %figure(3);
-    %hist(placeCellsHist,linspace(1,robot.nPlaceCells,robot.nPlaceCells));
+  ## figure(2);
+  ##   %hist(placeCellsHist,linspace(1,robot.nPlaceCells,robot.nPlaceCells));
   ## subplot(1+robot.nNeuronsPerVCO/2, 2, 5);
   ## plot(placeCellsOutputs(1,:))
   ## subplot(1+robot.nNeuronsPerVCO/2, 2, 6);

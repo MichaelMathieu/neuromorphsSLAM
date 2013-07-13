@@ -9,7 +9,7 @@ function robot = initRobot(x, y, theta, obstacles)
 	 
 	 % VCO
 	 robot.nNeuronsPerVCO = 4;
-	 dirs = [[0;1.5],[1.5;0],[0;2],[2;0],[0;-1.5],[-1.5;0],[0;-2],[-2;0]];
+	 dirs = [[0;1],[1;0],[0;-1],[-1;0]];
 	 robot.VCO = [];
 	 for i = 1:size(dirs,2)
 	   robot.VCO = [robot.VCO fakeVCOInit(dirs(:,i), robot.nNeuronsPerVCO)];

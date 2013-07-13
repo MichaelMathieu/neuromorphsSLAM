@@ -18,5 +18,5 @@ end
 
 global spikes = []
 global robot;
-robot = initRobot(0.2, 0.1, -pi/2, obstacles);
+robot = initRobot(0.1, 0.0, pi/2, obstacles);
 tick(@callback, 1, 1)
