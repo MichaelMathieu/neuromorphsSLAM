@@ -16,7 +16,8 @@ for iobs = 1:size(obstacles, 1)
 end
 %drawRefresh()
 
-global spikes = []
+global spikes;
+spikes = [];
 global robot;
 robot = initRobot(0.2, 0.1, -pi/2, obstacles);
 tick(@callback, 1, 1)

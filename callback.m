@@ -1,10 +1,10 @@
 function callback(dt)
   global robot;
   % Update robot position
-  ## border = 0.05;
-  ## for iobs = 1:size(robot.obstacles, 1)
-  ##     robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
-  ## end
+  % border = 0.05;
+  % for iobs = 1:size(robot.obstacles, 1)
+  %     robot = obstacleAvoidance(robot.obstacles(iobs,:), robot, border);
+  % end
   robot.theta = robot.theta + randn() * robot.noise;
 
   dx = robot.velocity*dt*cos(robot.theta);
@@ -22,7 +22,7 @@ function callback(dt)
   v = [dx/nSubIters, dy/nSubIters];
   for iter = 1:nSubIters
     for i = 1:size(robot.VCO, 2)
-      [robot.VCO(1,i), phi] = fakeVCOUpdate(robot.VCO(1,i), v, dt/nSubIters, robot.velocity);
+      [robot.VCO(1,i), phi] = fakeVCOUpdate(robot.VCO(1,i), v, dt/nSubIters);
       for j = 1:robot.nNeuronsPerVCO
 	[robot.VCOlif(i, j), V] = lifUpdate(robot.VCOlif(i,j), 0.8*max(phi(j),0), dt/nSubIters);
 	potentials(i, j, iter) = V;
@@ -30,12 +30,12 @@ function callback(dt)
     end
   end
   % Display VCO neuron outputs
-  ## figure(2);
-  ## for i = 1:size(robot.VCO,2)
-  ##     subplot(1+robot.nNeuronsPerVCO/2, 2, i);
-  ##     plot(reshape(potentials(i,1,:), nSubIters));
-  ##     title(["(" num2str(robot.VCO(i).d(1)) " " num2str(robot.VCO(i).d(2)) ")"])
-  ## end
+  % figure(2);
+  % for i = 1:size(robot.VCO,2)
+  %     subplot(1+robot.nNeuronsPerVCO/2, 2, i);
+  %     plot(reshape(potentials(i,1,:), nSubIters));
+  %     title(['(' num2str(robot.VCO(i).d(1)) ' ' num2str(robot.VCO(i).d(2)) ')'])
+  % end
   
   % Update place cells
   %potentials = reshape(potentials, robot.nNeuronsPerVCO*size(robot.VCO,2), nSubIters);
@@ -52,7 +52,7 @@ function callback(dt)
       [robot.placeCells(j), W] = lifUpdate(robot.placeCells(j), I(j), dt/nSubIters);
       if W > 40
 	 spikes = [spikes; [robot.x-dx+dx*i/nSubIters,robot.y-dy+dy*i/nSubIters, ceil(j/7), colors(mod(j,7)+1,:)] ];
-   	["Spike from cell " num2str(j) " at (" num2str(robot.x-dx+dx*i/nSubIters) " " num2str(robot.y-dy+dy*i/nSubIters) ")"]
+   	['Spike from cell ' num2str(j) ' at (' num2str(robot.x-dx+dx*i/nSubIters) ' ' num2str(robot.y-dy+dy*i/nSubIters) ')']
 	placeCellsHist = [placeCellsHist j];
       end
       placeCellsOutputs(j,i) = W;
@@ -61,10 +61,10 @@ function callback(dt)
   %if length(placeCellsHist) > 0
     %figure(3);
     %hist(placeCellsHist,linspace(1,robot.nPlaceCells,robot.nPlaceCells));
-  ## subplot(1+robot.nNeuronsPerVCO/2, 2, 5);
-  ## plot(placeCellsOutputs(1,:))
-  ## subplot(1+robot.nNeuronsPerVCO/2, 2, 6);
-  ## plot(todisp);
+  % subplot(1+robot.nNeuronsPerVCO/2, 2, 5);
+  % plot(placeCellsOutputs(1,:))
+  % subplot(1+robot.nNeuronsPerVCO/2, 2, 6);
+  % plot(todisp);
   %end
   if size(spikes,1) > 0
     figure(3);
