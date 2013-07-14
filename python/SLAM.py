@@ -29,9 +29,8 @@ class SLAM():
             for i in xrange(self.nVCO):
                 self.wPlaceCells[k, i*self.nPerVCO + placeCellsCo[k][i]] = 1./15
         C = 1
-        R = 2.5*1./(C*1e-9*math.log(2.)*2*math.pi*Omega)/1e6
-        self.placeCells = [lif.LIF(R=R, C=C,abs_ref = 0.005) for i in xrange(self.nPlaceCells)]
-        self.placeCellsOutputs = numpy.zeros([self.nPlaceCells])        
+        R = 2.3*1./(C*1e-9*math.log(2.)*2*math.pi*Omega)/1e6
+        self.placeCells = lif.LIFBank(self.nPlaceCells, R=R, C=C, abs_ref=0.005)
 
         self.testPC = [[] for i in xrange(self.nPlaceCells)]
         self.t = 0
@@ -62,11 +61,8 @@ class SLAM():
 #                         gui.point(robot.x, robot.y, color=tuple(color), width = 4)
 
         # Place cells:
-        I = self.wPlaceCells.dot(self.VCOlifoutputs.reshape(self.nVCO*self.nPerVCO,1))
-        for i in xrange(self.nPlaceCells):
-            cell = self.placeCells[i]
-            V = cell.update(I[i], dt)
-            self.placeCellsOutputs[i] = V
+        I = self.wPlaceCells.dot(self.VCOlifoutputs.reshape(self.nVCO*self.nPerVCO,1)).squeeze()
+        self.placeCellsOutputs = self.placeCells.update(I, dt)
 #         self.t += dt
 #         for i in xrange(self.nPlaceCells):
 #             if I[i].squeeze() > 40:
