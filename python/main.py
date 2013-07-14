@@ -11,7 +11,7 @@ if __name__=="__main__":
     dirs=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
     dirs = [[0.5*x,0.5*y] for x,y in dirs]
     slam = SLAM.SLAM(VCOdirs=dirs)
-    nSubIters = 50
+    nSubIters = 100
     try:
         while True:
             while gtk.events_pending():

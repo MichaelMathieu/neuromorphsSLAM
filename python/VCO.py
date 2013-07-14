@@ -2,14 +2,14 @@ import math
 import numpy
 
 class VCO():
-    def __init__(self, d, n):
+    def __init__(self, d, n, Omega = 8*2*math.pi):
         # d = [x,y] : direction of the VCO
         # n : number of outputs
         self.d = [float(d[0]), float(d[1])]
         self.n = n
         self.phase = 0.
         self.alpha = 2.*math.pi
-        self.Omega = 8. * 2*math.pi
+        self.Omega = Omega
         self.K = numpy.array([2*math.pi*i/n for i in xrange(n)])
         
     def update(self, dx, dy, dt):
