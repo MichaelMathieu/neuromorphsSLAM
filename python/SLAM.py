@@ -1,6 +1,6 @@
 import numpy
 import math
-import VCO
+import pynnVCO
 import lif
 import itertools
 
@@ -8,12 +8,8 @@ class SLAM():
     def __init__(self, VCOdirs=[[0,1],[1,0],[0,-1],[-1,0]], nPerVCO=4):
         # VCO:
         Omega = 8.*2*math.pi
-        self.controlVCO = VCO.VCO([0,0], 1)
-        self.VCOs = [VCO.VCO(d, nPerVCO, Omega=Omega) for d in VCOdirs]
-        self.VCOoutputs = numpy.zeros([len(self.VCOs), nPerVCO])
-        self.VCOlif = [[lif.LIF(R=40, abs_ref = 0.01) for i in xrange(nPerVCO)] \
-                           for j in xrange(len(VCOdirs))]
-        self.VCOlifoutputs = numpy.zeros([len(self.VCOs), nPerVCO])
+        self.VCOlifoutputs = numpy.zeros([len(VCOdirs), nPerVCO])
+ 	self.pynnVCO = pynnVCO.pynnVCO(VCOdirs, nPerVCO, Omega)
         self.nVCO = len(VCOdirs)
         self.nPerVCO = nPerVCO
         
@@ -36,14 +32,7 @@ class SLAM():
         self.t = 0
         
     def update(self, dx, dy, dt, robot = None, gui = None):
-        # VCO:
-        controlOutput = self.controlVCO.update(0, 0, dt)
-        for i in xrange(len(self.VCOs)):
-            self.VCOoutputs[i,:] = self.VCOs[i].update(dx, dy, dt)
-            for j in xrange(self.nPerVCO):
-                I = 1 * max(self.VCOoutputs[i][j],0)
-                self.VCOlifoutputs[i][j] = self.VCOlif[i][j].update(I, dt)
-
+        self.VCOlifoutputs = self.pynnVCO.update(dx,dy,dt)
         # debug
 #         if (robot != None) and (gui != None):
 #             colors = [i for i in itertools.product([0.,0.5,1.], [0.,0.5,1.], [0.,0.5,1.])]
