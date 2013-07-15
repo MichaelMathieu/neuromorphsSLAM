@@ -78,6 +78,6 @@ class SLAM():
             for i in xrange(self.nPlaceCells):
                 if self.placeCellsOutputs[i] > 40:
                 #if self.placeCellsOutputs[i] > 2.5:
-                    print i
+                    #print i
                     gui.point(robot.x, robot.y, color=tuple(colors[i]), width=4)
                 

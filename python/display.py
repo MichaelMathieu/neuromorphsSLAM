@@ -23,6 +23,9 @@ class GUI(object):
         self.scale = scale
         self.xoffset = xoffset
         self.yoffset = yoffset
+        self.main_window.connect("key-press-event", self.on_key_pressed)
+        self.main_window.connect("key-release-event", self.on_key_released)
+        self.keyboard_state = {}
 
     def create_window(self):
         self.main_window = gtk.Window(type=gtk.WINDOW_TOPLEVEL)
@@ -42,8 +45,27 @@ class GUI(object):
         self.main_window.add(self.canvas)
         self.main_window.show_all()
 
+    def on_key_pressed(self, window, event):
+        if window == self.main_window:
+            keyname = gtk.gdk.keyval_name(event.keyval)
+            self.keyboard_state[keyname] = True
+
+    def on_key_released(self, window, event):
+        if window == self.main_window:
+            keyname = gtk.gdk.keyval_name(event.keyval)
+            self.keyboard_state[keyname] = False
+
     def main_quit(self, *args):
         exit(0)
+
+    def keyState(self, key):
+        # key can be a letter or "Up", "Down", "Left", "Right", "space"
+        # see gtk.gdk.keyval_name documentation for the other keys
+        if key not in self.keyboard_state:
+            return False
+        else:
+            return self.keyboard_state[key]
+        
 
     def erase(self):
         self.draw_context.set_source_rgb(1, 1, 1)

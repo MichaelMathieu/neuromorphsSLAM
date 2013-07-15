@@ -14,12 +14,14 @@ class Robot():
         self.dtheta_obs_avoidance = 0.1*math.pi
         self.gui = gui
 
-    def update(self, dt):
+    def update(self, dt, dtheta, dvelocity):
+        self.theta += dtheta * dt
+        self.velocity += dvelocity * dt
         self.theta += random.gauss(0, self.noise)
         nCollisions = 0
         theta0 = self.theta
         for x1, y1, x2, y2 in self.obstacles:
-            nCollisions += self.avoidLine(x1, y1, x2, y2, dt)
+            nCollisions += self.avoidLine(x1, y1, x2, y2, dt, False)
         if nCollisions > 1:
             self.theta = theta0 + math.pi
         dx = self.velocity*dt*cos(self.theta)
@@ -30,7 +32,7 @@ class Robot():
             self.gui.line(self.x-dx, self.y-dy, self.x, self.y, color=(0,0,1), width=1)
         return dx, dy
         
-    def avoidLine(self, x1, y1, x2, y2, dt):
+    def avoidLine(self, x1, y1, x2, y2, dt, smooth = True):
         a = y2-y1
         b = x1-x2
         c = -a*x1 - b*y1
@@ -54,15 +56,19 @@ class Robot():
                     # p3 : proj of the velocity on the normal
                     p3 = self.velocity*dt*(dx*nx + dy*ny)
                     if p3 <= 0.1:
-                        if d <= 1.5*p3:
+                        if d <= 1.5*abs(p3):
                             self.theta = math.atan2(ny, nx)
+                            return 1
                         else:
-                            p4 = -dx*b + dy*a
-                            if p4 >= 0:
-                                self.theta += self.dtheta_obs_avoidance
+                            if smooth:
+                                p4 = -dx*b + dy*a
+                                if p4 >= 0:
+                                    self.theta += self.dtheta_obs_avoidance
+                                else:
+                                    self.theta -= self.dtheta_obs_avoidance
+                                return 1
                             else:
-                                self.theta -= self.dtheta_obs_avoidance
-                        return 1
+                                return 0
         return 0
         
             
