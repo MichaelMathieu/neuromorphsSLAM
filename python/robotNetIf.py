@@ -1,17 +1,21 @@
 from network_client import ClientTCP
 
-class RobotIF(ClientTCP):
-   def __init__(self):
-      super(RobotIF, self).__init__()
+class RobotNetIf(ClientTCP):
+   def __init__(self, ip, port):
+      super(RobotNetIf, self).__init__()
+      self.ip = ip
+      self.connect(ip, port)      
 
-   def setV(vX, vY, vR):
-      send("!D%d,%d,%d\n" % (vx, vy, vR))  
+   def setV(self, vX, vY, vR):
+      self.send(self, "!D%d,%d,%d\n" % (vX, vY, vR))  
+
+   def reset(self):
+      self.send(self, "R\n")
 
 try:
-   robotAddr = ("10.1.95.57", 56000)
-   r = RobotIF()
-   r.connect(*robotAddr)
-   r.send("R\n", robotAddr)
+   robotIp = "10.1.95.57"
+   robotPort = 56000
+   r = RobotNetIf(robotIp, robotPort)
 except KeyboardInterrupt:
    r.close()
 
