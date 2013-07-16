@@ -46,14 +46,14 @@ class RobotNetIf(ClientTCP):
       self.send( "R\n", self.address)
       self.send( "!E2\n", self.address) #Disable command echo
       
-
-robotIp = "10.1.95.57"
-robotPort = 56000
-r = RobotNetIf(robotIp, robotPort, True)
-print "getVs " + r.getVs()
-r.setV(20,0,0)
-print "getVs " + r.getVs()
-r.setV(0,0,0)
-print "getVs " + r.getVs()
-r.close()
+if __name__ == "__main__":
+   robotIp = "10.1.95.57"
+   robotPort = 56000
+   r = RobotNetIf(robotIp, robotPort, True)
+   print "getVs " + r.getVs()
+   r.setV(20,0,0)
+   print "getVs " + r.getVs()
+   r.setV(0,0,0)
+   print "getVs " + r.getVs()
+   r.close()
 
