@@ -42,6 +42,19 @@ def plotLines(dirs, nPhases, th_0, x_0, y_0, color=(0,1,0)):
             y2 = y0+200*b
             gui.line(x1,y1,x2,y2, width=1,color=color)
 
+lastNewPlaceCell = False
+def placeCellCreation(slam):
+    global lastNewPlaceCell
+    while gtk.events_pending():
+        gtk.main_iteration()
+    space = gui.keyState("space")
+    if space and not lastNewPlaceCell:
+        slam.newPlaceCell()
+        lastNewPlaceCell = True
+    if not space:
+        lastNewPlaceCell = False
+
+
 if __name__=="__main__":
     gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
 
@@ -49,19 +62,20 @@ if __name__=="__main__":
     y_0 = 0.1
     th0 = -math.pi/2
     dirsBase=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
-    factors = [2.,1.]
+    factors = [1.,0.5]
     dirs = [[[x*k,y*k] for x,y in dirsBase] for k in factors]
-    lineColors = [(0,1,0),(0,0,1)]
-    for dirs0,color in zip(dirs,lineColors):
-        plotLines(dirs0, 4, th0, x_0, y_0, color = color)
+    nPhases = [16,32]
+    #lineColors = [(0,1,0),(0,0,1)]
+    #for dirs0,color,nph in zip(dirs,lineColors,nPhases):
+    #    plotLines(dirs0, nph, th0, x_0, y_0, color = color)
 
     # robot
     robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0,
                         noise = 0.01, velocity = 0.2)
     # SLAM
-    k = 1
-    dirs = [(x,4) for x in dirs]
-    slam = SLAM.SLAM(dirs)
+    constants = [(6.1, 1.76, 0.001), (5., 1.2, 0.001)]
+    dirs = [(x,nph) for x,nph in zip(dirs,nPhases)]
+    slam = SLAM.SLAM(dirs, constants)
 
     # Number of sub-iterations (neuron timesteps per robot timestep)
     nSubIters = 100
@@ -79,6 +93,7 @@ if __name__=="__main__":
             dt = Dt/nSubIters
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt, robot, gui)
+                placeCellCreation(slam)
                 
     except KeyboardInterrupt:
         pass
