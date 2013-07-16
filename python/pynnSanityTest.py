@@ -3,10 +3,8 @@
 from pyNN.utility import get_script_args
 from pyNN.brian import *
 
-
-
 dt = 0.05
-setup(timestep=dt/10, min_delay=dt/10)
+setup(timestep=dt, min_delay=dt/10)
 
 cell = create(IF_curr_exp, {'v_thresh': -55.0, 'tau_refrac': 5.0})
 

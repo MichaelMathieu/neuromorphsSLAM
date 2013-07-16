@@ -6,11 +6,11 @@ import math
 
 if __name__=="__main__":
     gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
-    robot = robot.Robot(x = 0.1, y = 0.1, theta = 3.14/2, noise = 0.3, gui=gui,
-                        velocity = 0.2)
+    robot = robot.Robot(x = 0.1, y = 0.1, theta = 3.14/2, noise = 0.3, gui=gui, velocity = 0.2)
     dirs=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
     dirs = [[0.5*x,0.5*y] for x,y in dirs]
-    slam = SLAM.SLAM(VCOdirs=dirs)
+    Dt = 0.05
+    slam = SLAM.SLAM(Dt, VCOdirs=dirs)
     nSubIters = 100
     try:
         while True:
@@ -18,13 +18,10 @@ if __name__=="__main__":
                 gtk.main_iteration()
                 
             # Main loop : put code here
-            Dt = 0.05
+            # Removing the notion of subiterations here;
+	    # Subiters are handled inside of the pynnVCO module now
             Dx, Dy = robot.update(Dt)
-            dx = Dx/nSubIters
-            dy = Dy/nSubIters
-            dt = Dt/nSubIters
-            for i in range(nSubIters):
-                slam.update(dx, dy, dt, robot, gui)
+            slam.update(Dx, Dy, Dt, robot, gui)
         
     except KeyboardInterrupt:
         pass

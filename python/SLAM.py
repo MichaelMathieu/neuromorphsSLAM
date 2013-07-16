@@ -5,11 +5,13 @@ import lif
 import itertools
 
 class SLAM():
-    def __init__(self, VCOdirs=[[0,1],[1,0],[0,-1],[-1,0]], nPerVCO=4):
+    def __init__(self, simStepS, VCOdirs=[[0,1],[1,0],[0,-1],[-1,0]], nPerVCO=4):
         # VCO:
         Omega = 8.*2*math.pi
         self.VCOlifoutputs = numpy.zeros([len(VCOdirs), nPerVCO])
- 	self.pynnVCO = pynnVCO.pynnVCO(VCOdirs, nPerVCO, Omega)
+	# Run the pynn simulation with 100x more precision
+	pynnSimStepS = simStepS/100
+ 	self.pynnVCO = pynnVCO.pynnVCO(VCOdirs, nPerVCO, pynnSimStepS, Omega)
         self.nVCO = len(VCOdirs)
         self.nPerVCO = nPerVCO
         

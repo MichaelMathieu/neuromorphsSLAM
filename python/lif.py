@@ -30,8 +30,8 @@ class LIF():
 class LIFBank():
     def __init__(self, n, C = 1, R = 40, abs_ref = 0.005, V_th = 10, V_spike = 50):
         # computes n neurons at a time. faster than LIF
-        # R in nF
-        # C in M ohms
+        # R in M ohms 
+        # C in nF 
         # all V in volts
         # all times in seconds
         self.C = C
