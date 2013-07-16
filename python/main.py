@@ -50,7 +50,6 @@ if __name__=="__main__":
     if len(sys.argv) == 3:
        ip = sys.argv[1]
        port = int(sys.argv[2])
-       print ip, port
        robotInterface = robotNetIf.RobotNetIf(ip, port)
        robotInterface.reset()
        time.sleep(0.5)#Just to make sure the reset is done before we start

@@ -32,7 +32,6 @@ class Robot():
         dy = self.velocity*dt*sin(self.theta)
         if self.rif:
            dTheta = self.theta - origTheta
-           print self.theta, dTheta
            self.rif.setV(self.constVX,self.constVY,-900*dTheta)
            time.sleep(dt)
         self.x += dx
