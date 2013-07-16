@@ -20,22 +20,15 @@ def controller(gui):
         dvelocity -= incr_velocity
     return dtheta, dvelocity
 
-if __name__=="__main__":
-    gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
-
-    x_0 = 0.1
-    y_0 = 0.1
-    th0 = -math.pi/2
-    dirs=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
-    diffs = [[dirs[a][0]-dirs[b][0],dirs[a][1]-dirs[b][1]] for a,b in [(0,1),(1,2),(2,0)]]
-    thetas = [th0,th0+2.*math.pi/3,th0+4*math.pi/3]
-    #k = 0.5/(math.cos(math.pi/6)*math.sqrt(2.))
-    k = 1
-    for i in xrange(-10,10):
-        for j in xrange(3):
-            theta = thetas[j]
-            a0,b0 = diffs[j]
-            d = float(i)/(k*4)/math.sqrt(3)+(math.cos(theta)*x_0+math.sin(theta)*y_0)
+def plotLines(dirs, nPhases, th_0, x_0, y_0, color=(0,1,0)):
+    #TODO: only works with regularly samples dirs
+    d0 = dirs[0][0] - dirs[1][0]
+    d1 = dirs[0][1] - dirs[1][1]
+    ndiff = math.sqrt(d0*d0+d1*d1)
+    thetas = [math.atan2(y,x)+th_0 for x,y in dirs]
+    for i in xrange(-20,20):
+        for theta in thetas:
+            d = float(i)/nPhases/ndiff+(math.cos(theta)*x_0+math.sin(theta)*y_0)
             nx = math.cos(theta)
             ny = math.sin(theta)
             l = math.sqrt(nx*nx+ny*ny)
@@ -47,17 +40,28 @@ if __name__=="__main__":
             y1 = y0-200*b
             x2 = x0+200*a
             y2 = y0+200*b
-            gui.line(x1,y1,x2,y2, width=1,color=(0,1,0))        
+            gui.line(x1,y1,x2,y2, width=1,color=color)
+
+if __name__=="__main__":
+    gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
+
+    x_0 = 0.1
+    y_0 = 0.1
+    th0 = -math.pi/2
+    dirsBase=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
+    factors = [2.,1.]
+    dirs = [[[x*k,y*k] for x,y in dirsBase] for k in factors]
+    lineColors = [(0,1,0),(0,0,1)]
+    for dirs0,color in zip(dirs,lineColors):
+        plotLines(dirs0, 4, th0, x_0, y_0, color = color)
 
     # robot
     robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0,
                         noise = 0.01, velocity = 0.2)
     # SLAM
-    #k = 0.5/(math.cos(math.pi/6)*math.sqrt(2.)) 
-    k *= 1
-    dirs = [[k*x,k*y] for x,y in dirs]
-    dirs2 = [[2*x, 2*y] for x,y in dirs] # half frequencies
-    slam = SLAM.SLAM(VCOdirs=dirs2+dirs)
+    k = 1
+    dirs = [(x,4) for x in dirs]
+    slam = SLAM.SLAM(dirs)
 
     # Number of sub-iterations (neuron timesteps per robot timestep)
     nSubIters = 100
