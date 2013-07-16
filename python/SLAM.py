@@ -12,7 +12,7 @@ class SLAM():
         self.controlVCO = VCO.VCO([0,0], 1)
         self.VCOs = [VCO.VCO(d, nPerVCO, Omega=Omega) for d in VCOdirs]
         self.VCOoutputs = numpy.zeros([len(self.VCOs), nPerVCO])
-        self.VCOlif = [[lif.LIF(R=40, abs_ref = 0.01) for i in xrange(nPerVCO)] \
+        self.VCOlif = [[lif.LIF(R=40, C=3,abs_ref = 0.005) for i in xrange(nPerVCO)] \
                            for j in xrange(len(VCOdirs))]
         self.VCOlifoutputs = numpy.zeros([len(self.VCOs), nPerVCO])
         self.nVCO = len(VCOdirs)
@@ -20,12 +20,15 @@ class SLAM():
         
         # Place cells:
         placeCellsCo0= [[0,0,0],[0,1,0],[0,2,0],[0,3,0],
-                         [0,0,1],[0,1,1],[0,2,1],[0,3,1],
-                         [0,0,2],[0,1,2],[0,2,2],[0,3,2],
-                         [0,0,3],[0,1,3],[0,2,3],[0,3,3]]
+                        [0,0,1],[0,1,1],[0,2,1],[0,3,1],
+                        [0,0,2],[0,1,2],[0,2,2],[0,3,2],
+                        [0,0,3],[0,1,3],[0,2,3],[0,3,3]]
         placeCellsCo  = [[x  ,y  ,z  ,None,None,None] for x,y,z in placeCellsCo0]
         # placeCellsCo += [[None,None,None,x,y,z] for x,y,z in placeCellsCo0]
-        #placeCeallsCo = [[0,0,0,0,0,0],[0,2,2,0,1,1],[0,0,2,0,0,1],[0,2,0,0,1,0]]
+        placeCellsCo = [[0,0,0,0,0,0],[0,2,2,0,1,1],[0,0,2,0,0,1],[0,2,0,0,1,0],
+                        [0,0,0,1,1,1],[0,2,2,1,2,2],[0,0,2,1,1,2],[0,2,0,1,2,1],
+                        [0,0,0,2,2,2],[0,2,2,2,3,3],[0,0,2,2,2,3],[0,2,0,2,3,2],
+                        [0,0,0,3,3,3],[0,2,2,3,0,0],[0,0,2,3,3,0],[0,2,0,3,0,3]]
         #placeCellsCo = [i for i in itertools.product(range(nPerVCO), range(nPerVCO))]
         self.nPlaceCells = len(placeCellsCo)
         print(self.nPlaceCells)
@@ -34,11 +37,11 @@ class SLAM():
             for i in xrange(self.nVCO):
                 co = placeCellsCo[k][i]
                 if co != None:
-                    self.wPlaceCells[k, i*self.nPerVCO + co] = 1./15
+                    self.wPlaceCells[k, i*self.nPerVCO + co] = 1./30/1.8
         C = 1
         #R = 2.3*1./(C*1e-9*math.log(2.)*2*math.pi*Omega)/1e6
-        R = 2.*1./(C*1e-9*math.log(2.)*2*math.pi*Omega)/1e6
-        #R = 1.3*1./(C*1e-9*math.log(2.)*2*math.pi*Omega)/1e6
+        R = 2.7*1./(C*1e-9*math.log(2.)*2*math.pi*Omega)/1e6
+        #R = 1.2*1./(C*1e-9*math.log(2.)*2*math.pi*Omega)/1e6
         self.placeCells = lif.LIFBank(self.nPlaceCells, R=R, C=C, abs_ref=0.005)
 
         self.testPC = [[] for i in xrange(self.nPlaceCells)]
@@ -70,7 +73,8 @@ class SLAM():
         #                 color = colors[i*4+j]
         #                 gui.point(robot.x, robot.y, color=tuple(color), width = 4)
         #phases = [vco.phase - self.controlVCO.phase for vco in self.VCOs]
-        #self.plotphases = plots.phaseplot(phases, figure = self.plotphases)
+        phases = [vco.phase - self.VCOs[0].phase for vco in self.VCOs]
+        self.plotphases = plots.phaseplot(phases, figure = self.plotphases)
 
         # Place cells:
         I = self.wPlaceCells.dot(self.VCOlifoutputs.reshape(self.nVCO*self.nPerVCO,1)).squeeze()
