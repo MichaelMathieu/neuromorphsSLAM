@@ -12,11 +12,10 @@ class RobotNetIf(ClientTCP):
    def reset(self):
       self.send(self, "R\n")
 
-r = None
-#try:
-robotIp = "localhost"
-robotPort = 56000
-r = RobotNetIf(robotIp, robotPort)
-#except KeyboardInterrupt:
-r.close()
+try:
+   robotIp = "10.1.95.57"
+   robotPort = 56000
+   r = RobotNetIf(robotIp, robotPort)
+except KeyboardInterrupt:
+   r.close()
 
