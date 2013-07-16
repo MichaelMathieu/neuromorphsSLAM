@@ -1,5 +1,12 @@
 from network_client import ClientTCP
 import time
+import re
+
+class RobotFunc:
+   def __init__(self, queryStr, regexStr):
+      self.queryStr = queryStr
+      self.regex = re.compile(regexStr)
+      self.buf = str()
 
 class RobotNetIf(ClientTCP):
    def __init__(self, ip, port, debug = False):
@@ -9,6 +16,8 @@ class RobotNetIf(ClientTCP):
       self.sleepTime = 0.1
       self.maxV = 70
       self.minV = -70 
+      
+      self.TouchFn = RobotFunc("?T\n", "-T=(\d*)")
       self.recvV = str()
       self.rxBuffer = str()
       self.debug = debug
@@ -22,6 +31,10 @@ class RobotNetIf(ClientTCP):
          # finished with packet, now process it
          if s.find("-V") >= 0:
             self.recvV = s 
+         #elif s.find("-T") >= 0:
+         elif self.TouchFn.regex.match(s):
+            print "Got Touch " + s
+            self.TouchFn.buf = s
          elif self.debug:
             print "RobotNetIf ignoring packet: " + s
       self.rxBuffer = strings[-1] # non-empty incomplete packet 
@@ -42,6 +55,17 @@ class RobotNetIf(ClientTCP):
       self.recvV = str()
       return Vs
 
+   def getTouch(self):
+      
+      self.send( self.TouchFn.queryStr, self.address)
+      while len(self.TouchFn.buf) == 0:
+         time.sleep(self.sleepTime) 
+      touch = self.TouchFn.buf
+      self.TouchFn.buf = str()
+      bitmask = self.TouchFn.regex.match(touch).group(1) 
+      return [False, False, False, False, False, False]
+      
+
    def reset(self):
       self.send( "R\n", self.address)
       self.send( "!E2\n", self.address) #Disable command echo
@@ -50,10 +74,12 @@ if __name__ == "__main__":
    robotIp = "10.1.95.57"
    robotPort = 56000
    r = RobotNetIf(robotIp, robotPort, True)
-   print "getVs " + r.getVs()
-   r.setV(20,0,0)
-   print "getVs " + r.getVs()
-   r.setV(0,0,0)
-   print "getVs " + r.getVs()
+   #print "getVs " + r.getVs()
+   #r.setV(20,0,0)
+   #print "getVs " + r.getVs()
+   #r.setV(0,0,0)
+   #print "getVs " + r.getVs()
+   for i in range(100):
+      print r.getTouch()
    r.close()
 
