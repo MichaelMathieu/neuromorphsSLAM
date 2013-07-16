@@ -6,7 +6,7 @@ import itertools
 import plots
 
 class VCOBank():
-    def __init__(self, dirs, nPhases, R = 40, C = 3, abs_ref = 0.005):
+    def __init__(self, dirs, nPhases, R = 40, C = 3, abs_ref = 0.001):
         self.Omega = 8.*2*math.pi
         self.nDirs = len(dirs)
         self.nPhases = nPhases
@@ -19,12 +19,13 @@ class VCOBank():
         for iDir in xrange(self.nDirs):
             I = self.VCOs[iDir].update(dx, dy, dt)
             I = numpy.maximum(I, 0.)
+            #I = I+1
             self.outputs[iDir,:] = self.neurons[iDir].update(I, dt)
         return self.outputs
 
 class GridCellBank():
     def __init__(self, nDirs, nPhases, connectionGrid,
-                 R = 14., C = 1, abs_ref = 0.005, one_weight = 1./30):
+                 R = 6., C = 1.4, abs_ref = 0.001, one_weight = 1./15):
         self.nDirs = nDirs
         self.nPhases = nPhases
         self.nGridCells = len(connectionGrid)
@@ -33,7 +34,8 @@ class GridCellBank():
             for iGridCell in xrange(self.nGridCells):
                 iPhase = connectionGrid[iGridCell][iDir]
                 self.w[iGridCell, iDir*nPhases+iPhase] = one_weight
-        self.neurons = lif.LIFBank(n = self.nGridCells, R=R, C=C, abs_ref = abs_ref)
+        self.neurons = lif.LIFBank(n = self.nGridCells, R = R,C = C,
+                                    abs_ref = abs_ref, V_th = 10)
         self.outputs = numpy.array(self.nGridCells)
 
     def update(self, V, dt):
@@ -41,31 +43,111 @@ class GridCellBank():
         self.outputs = self.neurons.update(I, dt)
         return self.outputs
 
+class PlaceCell():
+    def __init__(self, connections, R = 40, C = 1, abs_ref = 0.005, V_th = 10):
+        # connections : [(iGridResolution, iGridCell, w)]
+        self.connections = connections
+        self.neuron = lif.LIF(R=R, C=C, abs_ref=abs_ref, V_th = V_th)
+        self.output = 0.
+        
+    def update(self, gridCells, dt):
+        I = 0.
+        for iGridRes, iGridCell, w in self.connections:
+            if gridCells[iGridRes].outputs[iGridCell] > 40:
+                I += w * 50
+        self.output = self.neuron.update(I, dt)
+        return self.output
+
 class SLAM():
-    def __init__(self, VCOblocks=[([0,1],[1,0],[0,-1],[-1,0], 4)]):
-        gridCellsCoBase = [[0,0,0],[0,0,1],[0,0,2],[0,0,3],
-                            [0,1,0],[0,1,1],[0,1,2],[0,1,3],
-                            [0,2,0],[0,2,1],[0,2,2],[0,2,3],
-                            [0,3,0],[0,3,1],[0,3,2],[0,3,3]]
-        gridCellsCo = [gridCellsCoBase for x in VCOblocks]
+    def __init__(self, VCOblocks=[([[0,1],[1,0],[0,-1],[-1,0]],4)],
+                 gridCellsConstants = [(6.,1.4,0.001)]):
+        # VCO
         self.VCOs = [VCOBank(dirs, nPhases) for dirs, nPhases in VCOblocks]
-        self.gridCells = [GridCellBank(len(dirs), nPhases, pcc) \
-                          for (dirs, nPhases),pcc in zip(VCOblocks, gridCellsCo)]
+        # Grid cells
+        gcb = xrange(7)
+        gridCellsCo = [[[0,i,j] for i,j in itertools.product(xrange(nph),xrange(nph))] \
+                       for vco,nph in VCOblocks]
+        # gridCellsCoBase = [[0,0,0],[0,0,1],[0,0,2],[0,0,3],
+        #                     [0,1,0],[0,1,1],[0,1,2],[0,1,3],
+        #                     [0,2,0],[0,2,1],[0,2,2],[0,2,3],
+        #                     [0,3,0],[0,3,1],[0,3,2],[0,3,3]]
+        #gridCellsCo = [gridCellsCoBase for x in VCOblocks]
+        self.gridCells = [GridCellBank(len(dirs), nPhases, pcc,R=R,C=C,abs_ref=ar) \
+                          for (dirs, nPhases),pcc,(R,C,ar) \
+                          in zip(VCOblocks, gridCellsCo, gridCellsConstants)]
+        # Place cells
+        #placeCellsCo = [[(0,i,1./10), (1,j,1./10)] \
+        #                for i,j in itertools.product(xrange(16),xrange(16))]
+        #self.placeCells = [PlaceCell(pcc, R=5, C=2) for pcc in placeCellsCo]
+        self.placeCells = []
+        self.winSize = 250 #TODO: dt
+        self.iWin = 0
+        self.gridCellsSpikes = [numpy.zeros([gc.nGridCells, self.winSize]) \
+                                for gc in self.gridCells]
+        self.it = 0
+        self.placeCellsToPut = []
+
+    def newPlaceCell(self):
+        self.placeCellsToPut.append(self.it+self.winSize/2)
+
+    def newPlaceCellDephased(self):
+        #TODO: this is not centered
+        w = [x.sum(1) for x in self.gridCellsSpikes]
+        connections = []
+        total_incoming = 0.
+        for i in xrange(len(w)):
+            for j in xrange(w[i].size):
+                if w[i][j] > 0:
+                    connections.append((i,j,float(w[i][j])))
+                    total_incoming += w[i][j]
+            # j = w[i].argmax()
+            # if w[i][j] != 0:
+            #     connections.append((i,j,1./w[i][j]))
+            # total_incoming += 1
+        if total_incoming < len(w):
+            print "No possible place cell here : No enough incomming spikes..."
+            return
+        W = 1./total_incoming
+        connections = [(i,j,weight*W) for (i,j,weight) in connections]
+        print connections
+        self.placeCells.append(PlaceCell(connections, R=100, C=1, V_th=10))
+        print "New place cell  \o/"
         
     def update(self, dx, dy, dt, robot = None, gui = None):
+        # VCO + Grid cells
         for i in xrange(len(self.VCOs)):
-            V = self.VCOs[i].update(dx, dy, dt)
-            self.gridCells[i].update(V, dt)
+            I = self.VCOs[i].update(dx, dy, dt)
+            V = self.gridCells[i].update(I, dt)
+            self.gridCellsSpikes[i][:,self.iWin] = (V>40)
+        # Place cells
+        for pc in self.placeCells:
+            pc.update(self.gridCells, dt)
+        self.iWin = (self.iWin + 1) % self.winSize
+        for placeCellToPut in self.placeCellsToPut:
+            if placeCellToPut == self.it:
+                self.newPlaceCellDephased()
+        self.it += 1
         
         # debug
-        colorsBase = [0.,0.33,0.67,1.]
-        colors = [i for i in itertools.product(colorsBase, colorsBase, colorsBase)]
+        # colorsBase = [0.,0.33,0.67,1.]
+        # #colorsBase = [0.,0.125,0.25,0.5,0.75,0.875,1.]
+        # colors = [i for i in itertools.product(colorsBase, colorsBase, colorsBase)]
+        # if (robot != None) and (gui != None):
+        #     for i in xrange(len(self.gridCells)):
+        #         pc = self.gridCells[i]
+        #         for j in xrange(pc.nGridCells):
+        #             if pc.outputs[j] > 40:
+        #                 if i == 0:
+        #                     print str(i) + "," + str(j) + " spiking"
+        #                     gui.point(robot.x, robot.y, color=tuple(colors[j%len(colors)]), width=i+3)
+
+        colorsBase = [0,1]
+        placeCellColors = [i for i in itertools.product(colorsBase,colorsBase,colorsBase)]
         if (robot != None) and (gui != None):
-            for i in xrange(len(self.gridCells)):
-                pc = self.gridCells[i]
-                for j in xrange(pc.nGridCells):
-                    if pc.outputs[j] > 40:
-                        print str(i) + "," + str(j) + " spiking"
-                        gui.point(robot.x, robot.y, color=tuple(colors[j]), width=4-i)
-                        
+            for i in xrange(len(self.placeCells)):
+                pc = self.placeCells[i]
+                if pc.output > 40:
+                    print "PC: " + str(i) + " spiking"
+                    gui.point(robot.x, robot.y, color=placeCellColors[i], width=5)
+        
                 
