@@ -20,8 +20,8 @@ class Robot():
         self.theta += random.gauss(0, self.noise)
         nCollisions = 0
         theta0 = self.theta
-        #for x1, y1, x2, y2 in self.obstacles:
-        #    nCollisions += self.avoidLine(x1, y1, x2, y2, dt, False)
+        for x1, y1, x2, y2 in self.obstacles:
+            nCollisions += self.avoidLine(x1, y1, x2, y2, dt, False)
         if nCollisions > 1:
             self.theta = theta0 + math.pi
         dx = self.velocity*dt*cos(self.theta)
@@ -70,3 +70,6 @@ class Robot():
                             else:
                                 return 0
         return 0
+        
+            
+                
