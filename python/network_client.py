@@ -21,9 +21,8 @@
 import socket
 import threading
 import Queue
-import time
 
-debug = True
+debug = False
 timeout = 0.1
 max_size = 1024
 
@@ -39,13 +38,12 @@ class ClientTCPSender(threading.Thread):
             if to_send:
                 self.connection.send(to_send)
             else:
-                time.sleep(0.001)
+                break
 
     def send(self, data):
         self.send_queue.put(data)
     
     def stop(self):
-        print "stop2"
         self.send_queue.put(None)
 
 class ClientTCPConnection(threading.Thread):
@@ -76,7 +74,7 @@ class ClientTCPConnection(threading.Thread):
                     print "ERROR", msg
                     break
             if not data:
-                time.sleep(0.001)
+                break
             self.recv_fun(data, self.address)
         if debug:
             print "A TCP client connection thread has stopped, address", \
@@ -90,7 +88,6 @@ class ClientTCPConnection(threading.Thread):
         self.send_thread.send(data)
 
     def stop(self):
-        print "stop"
         self.send_thread.stop()
         self.active = False
 
