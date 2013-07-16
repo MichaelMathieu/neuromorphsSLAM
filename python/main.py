@@ -4,9 +4,12 @@ import robot
 import SLAM
 import math
 import numpy
+import sys
+import robotNetIf
+import time 
 
 def controller(gui):
-    incr_theta = 5. # in rad PER SECOND
+    incr_theta = 1. # in rad PER SECOND
     incr_velocity = 0.1 # in meter (the world is 1m wide) per second square
     dtheta = 0.
     dvelocity = 0.
@@ -43,11 +46,26 @@ def plotLines(dirs, nPhases, th_0, x_0, y_0, color=(0,1,0)):
             gui.line(x1,y1,x2,y2, width=1,color=color)
 
 if __name__=="__main__":
+    robotInterface = None
+    if len(sys.argv) == 3:
+       ip = sys.argv[1]
+       port = int(sys.argv[2])
+       print ip, port
+       robotInterface = robotNetIf.RobotNetIf(ip, port)
+       robotInterface.reset()
+       time.sleep(0.5)#Just to make sure the reset is done before we start
+
+    elif len(sys.argv) == 1:
+       print "Using simulated robot"
+    else:
+       print "Usage: main.py <robot IP> <robot port>"
+       exit(-1)
+
     gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
 
-    x_0 = 0.1
-    y_0 = 0.1
-    th0 = -math.pi/2
+    x_0 = 0.5
+    y_0 = 0.5
+    th0 = 0
     dirsBase=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
     factors = [2.,1.]
     dirs = [[[x*k,y*k] for x,y in dirsBase] for k in factors]
@@ -56,8 +74,8 @@ if __name__=="__main__":
         plotLines(dirs0, 4, th0, x_0, y_0, color = color)
 
     # robot
-    robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0,
-                        noise = 0.01, velocity = 0.2)
+    noise = 0
+    robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0, noise = noise, velocity = 0.22, rif=robotInterface)
     # SLAM
     k = 1
     dirs = [(x,4) for x in dirs]
@@ -81,4 +99,5 @@ if __name__=="__main__":
                 slam.update(dx, dy, dt, robot, gui)
                 
     except KeyboardInterrupt:
-        pass
+	robot.rif.setV(0,0,0)
+	robot.rif.close() 

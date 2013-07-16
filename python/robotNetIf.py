@@ -32,7 +32,7 @@ class RobotNetIf(ClientTCP):
       vY = max(self.minV, min(self.maxV, int(vY)))
       vR = max(self.minV, min(self.maxV, int(vR)))
       self.send( "!D%d,%d,%d\n" % (vX, vY, vR), self.address)  
-      #print "!D%d,%d,%d\n" % (vX, vY, vR)
+      print "!D%d,%d,%d\n" % (vX, vY, vR)
    
    def getVs(self):
       self.send( "?Vs\n", self.address)

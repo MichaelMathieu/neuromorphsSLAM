@@ -1,20 +1,24 @@
 import math
 from math import sqrt, sin, cos
 import random
+import time
 
 class Robot():
-    def __init__(self, x = 0., y = 0., theta = 0., velocity = 0.1, noise = 0.01,
-                 obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]], gui = None):
+    def __init__(self, x = 0., y = 0., theta = 0., velocity = 0.1, noise = 0.01, obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]], gui = None, rif = None):
         self.x = x
         self.y = y
+        self.constVX = 70
+        self.constVY = 0
         self.theta = theta
         self.velocity = velocity
         self.obstacles = obstacles
         self.noise = noise
-        self.dtheta_obs_avoidance = 0.1*math.pi
+        self.dtheta_obs_avoidance = 0.05*math.pi
         self.gui = gui
+	self.rif = rif
 
     def update(self, dt, dtheta, dvelocity):
+        origTheta = self.theta
         self.theta += dtheta * dt
         self.velocity += dvelocity * dt
         self.theta += random.gauss(0, self.noise)
@@ -26,6 +30,11 @@ class Robot():
             self.theta = theta0 + math.pi
         dx = self.velocity*dt*cos(self.theta)
         dy = self.velocity*dt*sin(self.theta)
+        if self.rif:
+           dTheta = self.theta - origTheta
+           print self.theta, dTheta
+           self.rif.setV(self.constVX,self.constVY,-900*dTheta)
+           time.sleep(dt)
         self.x += dx
         self.y += dy
         if self.gui:
