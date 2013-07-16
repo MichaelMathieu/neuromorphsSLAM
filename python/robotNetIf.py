@@ -62,8 +62,12 @@ class RobotNetIf(ClientTCP):
          time.sleep(self.sleepTime) 
       touch = self.TouchFn.buf
       self.TouchFn.buf = str()
-      bitmask = self.TouchFn.regex.match(touch).group(1) 
-      return [False, False, False, False, False, False]
+      bitmask = int(self.TouchFn.regex.match(touch).group(1))
+      bitArr = [False, False, False, False, False, False] 
+      for i in range(len(bitArr)):
+         if bitmask & pow(2,i):
+            bitArr[i] = True
+      return bitArr
       
 
    def reset(self):
