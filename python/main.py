@@ -9,7 +9,7 @@ import robotNetIf
 import time 
 
 def controller(gui):
-    incr_theta = 1. # in rad PER SECOND
+    incr_theta = 3. # in rad PER SECOND
     incr_velocity = 0.1 # in meter (the world is 1m wide) per second square
     dtheta = 0.
     dvelocity = 0.
