@@ -85,8 +85,7 @@ if __name__ == "__main__":
    r.setV(20,0,0)
    print "getVs ", r.getVs()
    r.setV(0,0,0)
-   #print "getVs ",+ r.getVs()
-   #for i in range(100):
-   #   print r.getTouch()
+   print "getVs ",+ r.getVs()
+   print r.getTouch()
    r.close()
 
