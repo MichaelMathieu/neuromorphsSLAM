@@ -40,7 +40,8 @@ class RobotNetIf(ClientTCP):
       self.minV = -70 
       self.QueryFuncs = { 
          "T":TouchSenseFunc("?T\n", "-T=(\d*)", 1, int),
-         "Vs":RobotFunc("?Vs\n", "-V0=([-]*\d*) r/m, 1=([-]*\d*) r/m, 2=([-]*\d*) r/m", 3, float)
+         "Vs":RobotFunc("?Vs\n", "-V0=([-]*\d*) r/m, 1=([-]*\d*) r/m, 2=([-]*\d*) r/m", 3, int),
+         "Wi":RobotFunc("?Wi\n", "-Wi0=([-]*\d*), 1=([-]*\d*), 2=([-]*\d*)", 3, int)
          }
 
       self.recvV = str()
@@ -60,8 +61,7 @@ class RobotNetIf(ClientTCP):
 	       print "Got " + f
 	       self.QueryFuncs[f].buf = s 
             elif self.debug:
-               #print "RobotNetIf ignoring packet: " + s
-               pass
+               print "RobotNetIf ignoring packet: " + s
       self.rxBuffer = strings[-1] # non-empty incomplete packet 
 
          
@@ -71,7 +71,10 @@ class RobotNetIf(ClientTCP):
       vR = max(self.minV, min(self.maxV, int(vR)))
       self.send( "!D%d,%d,%d\n" % (vX, vY, vR), self.address)  
       #print "!D%d,%d,%d\n" % (vX, vY, vR)
-  
+
+   def setW(self, w0, w1, w2):
+      self.send( "!w%d,%d,%d\n" % (w0, w1, w2), self.address)  
+   
 
    def get(self, request):
       val = None
@@ -84,21 +87,6 @@ class RobotNetIf(ClientTCP):
       else:
 	 print "Error - attempted to get unsupported value " + request
       return val
-
-   def getTouch(self):
-      
-      self.send( self.TouchFn.queryStr, self.address)
-      while len(self.TouchFn.buf) == 0:
-         time.sleep(self.sleepTime) 
-      touch = self.TouchFn.buf
-      self.TouchFn.buf = str()
-      bitmask = int(self.TouchFn.regex.match(touch).group(1))
-      bitArr = [False, False, False, False, False, False] 
-      for i in range(len(bitArr)):
-         if bitmask & pow(2,i):
-            bitArr[i] = True
-      return bitArr
-      
    
    def reset(self):
       self.send( "R\n", self.address)
@@ -108,12 +96,12 @@ if __name__ == "__main__":
    robotIp = "10.1.95.57"
    robotPort = 56000
    r = RobotNetIf(robotIp, robotPort, True)
-   
+  
+   r.setW(10,20,30) 
    print "get(Vs) ", r.get("Vs")
    #r.setV(20,0,0)
-   print "get(Vs) ", r.get("Vs")
+   print "get(Wi) ", r.get("Wi")
    #r.setV(0,0,0)
-   print "get(Vs) ", r.get("Vs")
    print "get(T) ", r.get("T")
    #print r.getTouch()
    r.close()
