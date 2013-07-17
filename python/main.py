@@ -116,7 +116,7 @@ if __name__=="__main__":
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             for i in xrange(nSubIters):
-                slam.update(dx, dy, dt/5, robot, gui)
+                slam.update(dx, dy, dt/10, robot, gui)
                 placeCellCreation(slam)
                 robot.updateRobot(dx,dy,0)
                 

@@ -17,6 +17,7 @@ class Robot():
         self.dtheta_obs_avoidance = 0.1*math.pi
         self.gui = gui
         self.aim = ("forward",None)
+        self.rif = None
         if rif:
             self.initRobot(rif)
 
@@ -32,13 +33,13 @@ class Robot():
         self.robotTargetWheelsPosition = numpy.matrix(self.rif.get("Wi"),dtype='float').T
 
     def updateRobot(self, dx, dy, dtheta):
-        #dtheta 
-        dpos = numpy.matrix([[dx],[dy],[dtheta]])
-        dwheels = self.robotCoordinateMatrix * dpos
-        self.robotTargetWheelsPosition += dwheels
-        self.rif.setW(self.robotTargetWheelsPosition[0,0],
-                      self.robotTargetWheelsPosition[1,0],
-                      self.robotTargetWheelsPosition[2,0])
+        if self.rif:
+            dpos = numpy.matrix([[dx],[dy],[dtheta]])
+            dwheels = self.robotCoordinateMatrix * dpos
+            self.robotTargetWheelsPosition += dwheels
+            self.rif.setW(self.robotTargetWheelsPosition[0,0],
+                          self.robotTargetWheelsPosition[1,0],
+                          self.robotTargetWheelsPosition[2,0])
         
     def update(self, dt, dtheta, dvelocity):
         dx = 0
@@ -68,13 +69,7 @@ class Robot():
             #not used for now
             torotate = self.aim[1] - self.theta
             maxdtheta = 10.
-            
-        if self.rif:
-            #dTheta = self.theta - origTheta
-            #self.rif.setV(self.constVX,self.constVY,-900*dTheta)
-            #self.rif.setV(self.constVX,self.constVY,-35.*dTheta/dt*1.08)
-            #self.updateRobot(dx, dy, dtheta)
-            pass
+
         return dx, dy
         
     def avoidLine(self, x1, y1, x2, y2, dt, smooth = True):
