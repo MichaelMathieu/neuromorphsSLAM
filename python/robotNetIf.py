@@ -18,20 +18,22 @@ class RobotNetIf(ClientTCP):
       self.minV = -70 
       
       self.TouchFn = RobotFunc("?T\n", "-T=(\d*)")
+      self.VFn = RobotFunc("?Vs\n", "-V0=([-]*\d*) r/m, 1=([-]*\d*) r/m, 2=([-]*\d*) r/m")
       self.recvV = str()
       self.rxBuffer = str()
       self.debug = debug
-      #self.reset()
-      #time.sleep(self.sleepTime)
+      self.reset()
+      time.sleep(self.sleepTime)
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
       strings = self.rxBuffer.split("\n")
       for s in strings[:-1]:
+         print "Processing " + s
          # finished with packet, now process it
-         if s.find("-V") >= 0:
-            self.recvV = s 
-         #elif s.find("-T") >= 0:
+         if self.VFn.regex.match(s):
+            print "Got V " + s
+            self.VFn.buf = s 
          elif self.TouchFn.regex.match(s):
             print "Got Touch " + s
             self.TouchFn.buf = s
@@ -48,11 +50,11 @@ class RobotNetIf(ClientTCP):
       #print "!D%d,%d,%d\n" % (vX, vY, vR)
    
    def getVs(self):
-      self.send( "?Vs\n", self.address)
-      while len(self.recvV) == 0:
+      self.send( self.VFn.queryStr, self.address)
+      while len(self.VFn.buf) == 0:
          time.sleep(self.sleepTime) 
-      Vs = self.recvV
-      self.recvV = str()
+      Vs = [int(i) for i in self.VFn.regex.match(self.VFn.buf).group(1,2,3)]
+      self.VFn.buf = str()
       return Vs
 
    def getTouch(self):
@@ -69,7 +71,7 @@ class RobotNetIf(ClientTCP):
             bitArr[i] = True
       return bitArr
       
-
+   
    def reset(self):
       self.send( "R\n", self.address)
       self.send( "!E2\n", self.address) #Disable command echo
@@ -78,12 +80,13 @@ if __name__ == "__main__":
    robotIp = "10.1.95.57"
    robotPort = 56000
    r = RobotNetIf(robotIp, robotPort, True)
-   #print "getVs " + r.getVs()
-   #r.setV(20,0,0)
-   #print "getVs " + r.getVs()
-   #r.setV(0,0,0)
-   #print "getVs " + r.getVs()
-   for i in range(100):
-      print r.getTouch()
+   
+   print "getVs ", r.getVs()
+   r.setV(20,0,0)
+   print "getVs ", r.getVs()
+   r.setV(0,0,0)
+   #print "getVs ",+ r.getVs()
+   #for i in range(100):
+   #   print r.getTouch()
    r.close()
 
