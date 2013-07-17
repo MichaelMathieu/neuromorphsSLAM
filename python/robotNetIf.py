@@ -54,12 +54,15 @@ class RobotNetIf(ClientTCP):
       self.rxBuffer = self.rxBuffer + data
       strings = self.rxBuffer.split("\n")
       for s in strings[:-1]:
-         #print "Processing " + s
+         print "Processing " + s
          # finished with packet, now process it
          for f in self.QueryFuncs:
             if self.QueryFuncs[f].regex.match(s):
 	       print "Got " + f
 	       self.QueryFuncs[f].buf = s 
+            elif s.find("N-OmniRob Control") == 0:
+               print "Init String recd: " + s
+               self.init = True 
             elif self.debug:
                print "RobotNetIf ignoring packet: " + s
       self.rxBuffer = strings[-1] # non-empty incomplete packet 
@@ -89,20 +92,29 @@ class RobotNetIf(ClientTCP):
       return val
    
    def reset(self):
+      self.init = False
       self.send( "R\n", self.address)
+      print "Waiting for robot init string..."
+      while not self.init:
+         time.sleep(self.sleepTime) 
       self.send( "!E2\n", self.address) #Disable command echo
       
 if __name__ == "__main__":
    robotIp = "10.1.95.57"
    robotPort = 56000
-   r = RobotNetIf(robotIp, robotPort, True)
+   debug = False
+   r = RobotNetIf(robotIp, robotPort, debug)
   
-   r.setW(10,20,30) 
-   print "get(Vs) ", r.get("Vs")
+   #r.setW(10,20,30) 
+   #print "get(Vs) ", r.get("Vs")
    #r.setV(20,0,0)
-   print "get(Wi) ", r.get("Wi")
+   #print "get(Wi) ", r.get("Wi")
+   #print "get(Wi) ", r.get("Wi")
+   #print "get(Wi) ", r.get("Wi")
+   #print "get(Wi) ", r.get("Wi")
+
    #r.setV(0,0,0)
-   print "get(T) ", r.get("T")
+   #print "get(T) ", r.get("T")
    #print r.getTouch()
    r.close()
 
