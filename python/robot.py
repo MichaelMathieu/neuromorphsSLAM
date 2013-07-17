@@ -18,7 +18,7 @@ class Robot():
         self.gui = gui
         self.aim = ("forward",None)
         if rif:
-            self.initRobot(rif)xs
+            self.initRobot(rif)
 
     def initRobot(self, rif):
         self.rif = rif
