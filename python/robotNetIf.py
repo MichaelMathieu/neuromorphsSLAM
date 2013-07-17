@@ -48,7 +48,7 @@ class RobotNetIf(ClientTCP):
       self.rxBuffer = str()
       self.debug = debug
       self.reset()
-      time.sleep(self.sleepTime)
+      time.sleep(self.sleepTime+2)
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
@@ -73,7 +73,8 @@ class RobotNetIf(ClientTCP):
       #print "!D%d,%d,%d\n" % (vX, vY, vR)
 
    def setW(self, w0, w1, w2):
-      self.send( "!w%d,%d,%d\n" % (w0, w1, w2), self.address)  
+      #print "!W%d,%d,%d\n" % (w0, w1, w2)
+      self.send( "!W%d,%d,%d\n" % (w0, w1, w2), self.address)  
    
 
    def get(self, request):

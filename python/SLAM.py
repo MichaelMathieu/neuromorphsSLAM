@@ -19,7 +19,6 @@ class VCOBank():
         for iDir in xrange(self.nDirs):
             I = self.VCOs[iDir].update(dx, dy, dt)
             I = numpy.maximum(I, 0.)
-            #I = I+1
             self.outputs[iDir,:] = self.neurons[iDir].update(I, dt)
         return self.outputs
 
@@ -67,18 +66,10 @@ class SLAM():
         gcb = xrange(7)
         gridCellsCo = [[[0,i,j] for i,j in itertools.product(xrange(nph),xrange(nph))] \
                        for vco,nph in VCOblocks]
-        # gridCellsCoBase = [[0,0,0],[0,0,1],[0,0,2],[0,0,3],
-        #                     [0,1,0],[0,1,1],[0,1,2],[0,1,3],
-        #                     [0,2,0],[0,2,1],[0,2,2],[0,2,3],
-        #                     [0,3,0],[0,3,1],[0,3,2],[0,3,3]]
-        #gridCellsCo = [gridCellsCoBase for x in VCOblocks]
         self.gridCells = [GridCellBank(len(dirs), nPhases, pcc,R=R,C=C,abs_ref=ar) \
                           for (dirs, nPhases),pcc,(R,C,ar) \
                           in zip(VCOblocks, gridCellsCo, gridCellsConstants)]
         # Place cells
-        #placeCellsCo = [[(0,i,1./10), (1,j,1./10)] \
-        #                for i,j in itertools.product(xrange(16),xrange(16))]
-        #self.placeCells = [PlaceCell(pcc, R=5, C=2) for pcc in placeCellsCo]
         self.placeCells = []
         self.winSize = 250 #TODO: dt
         self.iWin = 0
@@ -100,14 +91,10 @@ class SLAM():
                 if w[i][j] > 0:
                     connections.append((i,j,float(w[i][j])))
                     total_incoming += w[i][j]
-            # j = w[i].argmax()
-            # if w[i][j] != 0:
-            #     connections.append((i,j,1./w[i][j]))
-            # total_incoming += 1
         if total_incoming < len(w):
             print "No possible place cell here : No enough incomming spikes..."
             return
-        W = 1./total_incoming
+        W = 1.5/total_incoming
         connections = [(i,j,weight*W) for (i,j,weight) in connections]
         print connections
         self.placeCells.append(PlaceCell(connections, R=100, C=1, V_th=10))
