@@ -88,9 +88,11 @@ if __name__=="__main__":
     y_0 = 0.5
     th0 = 0
     dirsBase=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
+    dirsBase2=[[0,1],[math.sqrt(3.)/2,-0.5],[-math.sqrt(3.)/2,-0.5]]
     factors = [1.,0.5]
     dirs = [[[x*k,y*k] for x,y in dirsBase] for k in factors]
-    nPhases = [16,32]
+    dirs += [[[x*k,y*k] for x,y in dirsBase2] for k in factors]
+    nPhases = [8,16,8,16]
     #lineColors = [(0,1,0),(0,0,1)]
     #for dirs0,color,nph in zip(dirs,lineColors,nPhases):
     #    plotLines(dirs0, nph, th0, x_0, y_0, color = color)
@@ -98,9 +100,10 @@ if __name__=="__main__":
     # robot
     noise = 0
     robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0, noise = noise,
-                        velocity = 0.1, rif=robotInterface)
+                        velocity = 0.025, rif=robotInterface)
     # SLAM
-    constants = [(6.1, 1.76, 0.001), (5., 1.2, 0.001)]
+    constants = [(145., 1., 0.001), (145., 1., 0.001),
+                 (145., 1., 0.001), (145., 1., 0.001)]
     dirs = [(x,nph) for x,nph in zip(dirs,nPhases)]
     slam = SLAM.SLAM(dirs, constants)
 
@@ -125,7 +128,7 @@ if __name__=="__main__":
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             for i in xrange(nSubIters):
-                slam.update(dx, dy, dt/10, robot, gui)
+                slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
                 robot.updateRobot(dx,dy,0)
                 

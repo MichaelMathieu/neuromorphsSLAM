@@ -16,16 +16,17 @@ class LIF():
         self.V_spike = 50
 
     def update(self, I, dt):
-        if self.ref < 0.001:
+        if self.ref < 0:
             self.V += dt*1000*( - self.V/(self.R*self.C) + I/self.C)
             self.V = max(self.V, 0)
         else:
             self.ref -= dt
             self.V = self.V_reset
         if self.V > self.V_th:
-            self.V = self.V_spike
             self.ref = self.abs_ref
-        return self.V
+            return self.V_spike
+        else:
+            return 0.
 
 class LIFBank():
     def __init__(self, n, C = 1, R = 40, abs_ref = 0.005, V_th = 10, V_spike = 50):
@@ -44,17 +45,16 @@ class LIFBank():
         self.V_spike = 50
 
     def update(self, I, dt):
-        nrefs = self.ref < 0.001
+        nrefs = self.ref < 0.
+        refs = 1-nrefs
         self.V += (-self.V/(self.R*self.C) + I/self.C)*dt*1000
         self.V = self.V * (self.V > 0)
-        refs = 1-nrefs
-        self.ref -= refs*dt
+        self.ref -= dt
         self.V = nrefs*self.V + refs*self.V_reset
         th = self.V > self.V_th
         nth = 1-th
-        self.V = nth*self.V + th*self.V_spike
         self.ref = nth*self.ref + th*self.abs_ref
-        return self.V
+        return self.V_spike * th
 
 # unit test
 if __name__=="__main__":

@@ -24,7 +24,7 @@ class VCOBank():
 
 class GridCellBank():
     def __init__(self, nDirs, nPhases, connectionGrid,
-                 R = 6., C = 1.4, abs_ref = 0.001, one_weight = 1./15):
+                 R = 6., C = 1.4, abs_ref = 0.001, one_weight = 1./12):
         self.nDirs = nDirs
         self.nPhases = nPhases
         self.nGridCells = len(connectionGrid)
@@ -116,15 +116,15 @@ class SLAM():
         self.it += 1
         
         # debug
-        # colorsBase = [0.,0.33,0.67,1.]
-        # #colorsBase = [0.,0.125,0.25,0.5,0.75,0.875,1.]
+        colorsBase = [0.,0.33,0.67,1.]
+        #colorsBase = [0.,0.125,0.25,0.5,0.75,0.875,1.]
         # colors = [i for i in itertools.product(colorsBase, colorsBase, colorsBase)]
         # if (robot != None) and (gui != None):
         #     for i in xrange(len(self.gridCells)):
         #         pc = self.gridCells[i]
         #         for j in xrange(pc.nGridCells):
         #             if pc.outputs[j] > 40:
-        #                 if i == 0:
+        #                 if i == 1:
         #                     print str(i) + "," + str(j) + " spiking"
         #                     gui.point(robot.x, robot.y, color=tuple(colors[j%len(colors)]), width=i+3)
 
@@ -135,6 +135,6 @@ class SLAM():
                 pc = self.placeCells[i]
                 if pc.output > 40:
                     print "PC: " + str(i) + " spiking"
-                    gui.point(robot.x, robot.y, color=placeCellColors[i], width=5)
+                    gui.point(robot.x, robot.y, color=placeCellColors[i%len(placeCellColors)], width=5)
         
                 
