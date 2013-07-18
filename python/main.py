@@ -70,10 +70,10 @@ if __name__=="__main__":
     th0 = 0
     dirsBase=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
     dirsBase2=[[0,1],[math.sqrt(3.)/2,-0.5],[-math.sqrt(3.)/2,-0.5]]
-    factors = [1.,0.5]
+    factors = [0.7,1.4]
     dirs = [[[x*k,y*k] for x,y in dirsBase] for k in factors]
     dirs += [[[x*k,y*k] for x,y in dirsBase2] for k in factors]
-    nPhases = [16,32,16,32]
+    nPhases = [16,16,16,16]
     #lineColors = [(0,1,0),(0,0,1)]
     #for dirs0,color,nph in zip(dirs,lineColors,nPhases):
     #    plotLines(dirs0, nph, th0, x_0, y_0, color = color)
@@ -90,14 +90,15 @@ if __name__=="__main__":
        robot = robot.SimRobot(x = x_0, y = y_0, noise = noise)
     
     # SLAM
-    R = 18.
-    constants = [(R, 1., 0.001), (R, 1., 0.001),
-                 (R, 1., 0.001), (R, 1., 0.001)]
+    R = 10.
+    Vth=9.
+    constants = [(R, 1., 0.001,Vth), (R, 1., 0.001,Vth),
+                 (R, 1., 0.001,Vth), (R, 1., 0.001,Vth)]
     dirs = [(x,nph) for x,nph in zip(dirs,nPhases)]
     slam = SLAM.SLAM(dirs, constants)
 
     # Number of sub-iterations (neuron timesteps per robot timestep)
-    nSubIters = 100
+    nSubIters = 75
     Dt = 0.25
     nextTime = time.time()+Dt
     
