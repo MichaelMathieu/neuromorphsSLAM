@@ -7,6 +7,8 @@ import numpy
 import sys
 import robotNetIf
 import time 
+import argparse
+from keyValueInterface import keyValueInterface
 
 def controller(gui):
     incr_theta = 3. # in rad PER SECOND
@@ -59,19 +61,29 @@ def placeCellCreation(slam):
 
 
 if __name__=="__main__":
-    robotInterface = None
-    if len(sys.argv) == 3:
-       ip = sys.argv[1]
-       port = int(sys.argv[2])
-       robotInterface = robotNetIf.RobotNetIf(ip, port)
-       robotInterface.reset()
-       time.sleep(0.5)#Just to make sure the reset is done before we start
+    parser = argparse.ArgumentParser(description="Bio-Inspired VCO controlled robotic SLAM implementation.")
+    parser.add_argument("--robotIp", help="IP Address of the robot to be used- optional")
+    parser.add_argument("--robotPort", default=56000, type=int, help="TCP Port for the robot to be controlled")
+    parser.add_argument("--kvServerIp", help="IP for the key-value server used to communicate with matlab and other processes")
+    parser.add_argument("--kvServerPort", default=21567, type=int, help="UDP port for use with the key value server")
+    args = parser.parse_args()
 
-    elif len(sys.argv) == 1:
-       print "Using simulated robot"
+    robotInterface = None
+    if args.robotIp:
+       robotInterface = robotNetIf.RobotNetIf(args.robotIp, args.robotPort)
+       robotInterface.reset()
+       #Just to make sure the reset is done before we start
+       time.sleep(1)
+
     else:
-       print "Usage: main.py <robot IP> <robot port>"
-       exit(-1)
+       print "Using simulated robot"
+
+    kvInterface = None
+    if args.kvServerIp:
+        print "Connecting to Key Value server ", args.kvServerIp,":", args.kvServerPort
+        kvInterface = keyValueInterface(args.kvServerIp, args.kvServerPort,"slam")
+
+    
 
     gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
 

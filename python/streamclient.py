@@ -4,7 +4,7 @@ import threading
 class MalformedResponseError(Exception):
     pass
 
-class StreamClient:
+class StreamClient(object):
     def __init__(self, host, port, timeout=0.1, debug=False):
         self.timeout = timeout
         self.sock = socket.socket(type=socket.SOCK_DGRAM)
