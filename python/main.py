@@ -50,6 +50,7 @@ def plotLines(dirs, nPhases, th_0, x_0, y_0, color=(0,1,0)):
 lastNewPlaceCell = False
 def placeCellCreation(slam):
     global lastNewPlaceCell
+    global lastBump
     while gtk.events_pending():
         gtk.main_iteration()
     space = gui.keyState("space")
@@ -58,7 +59,6 @@ def placeCellCreation(slam):
         lastNewPlaceCell = True
     if not space:
         lastNewPlaceCell = False
-
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Bio-Inspired VCO controlled robotic SLAM implementation.")
@@ -92,18 +92,19 @@ if __name__=="__main__":
     factors = [1.,0.5]
     dirs = [[[x*k,y*k] for x,y in dirsBase] for k in factors]
     dirs += [[[x*k,y*k] for x,y in dirsBase2] for k in factors]
-    nPhases = [8,16,8,16]
+    nPhases = [16,32,16,32]
     #lineColors = [(0,1,0),(0,0,1)]
     #for dirs0,color,nph in zip(dirs,lineColors,nPhases):
     #    plotLines(dirs0, nph, th0, x_0, y_0, color = color)
 
     # robot
-    noise = 0
+    noise = 0.
     robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0, noise = noise,
-                        velocity = 0.025, rif=robotInterface)
+                        velocity = 0.033, rif=robotInterface)
     # SLAM
-    constants = [(145., 1., 0.001), (145., 1., 0.001),
-                 (145., 1., 0.001), (145., 1., 0.001)]
+    R = 18.
+    constants = [(R, 1., 0.001), (R, 1., 0.001),
+                 (R, 1., 0.001), (R, 1., 0.001)]
     dirs = [(x,nph) for x,nph in zip(dirs,nPhases)]
     slam = SLAM.SLAM(dirs, constants)
 
@@ -111,6 +112,12 @@ if __name__=="__main__":
     nSubIters = 100
     Dt = 0.25
     nextTime = time.time()+Dt
+    cheatFactor = 2.
+    # the cheat factor is the ratio of the true world over 1meter.
+    # Careful that the speed is also multiplied
+    lastBump = False
+    bumped = False
+    it = 0
     try:
         while True:
             while gtk.events_pending():
@@ -122,16 +129,33 @@ if __name__=="__main__":
             nextTime += Dt
                 
             # Main loop : put code here
+            if it % 10 == 0:
+                if robot.rif:
+                    robot.rif.setBumpStream(10)
             dtheta, dvelocity = controller(gui)
-            Dx, Dy = robot.update(dt = Dt, dtheta = dtheta*Dt, dvelocity = dvelocity)
+            Dx, Dy = robot.update(dt = Dt, dtheta = dtheta*Dt, dvelocity = dvelocity,
+                                  bump = bumped)
             dx = Dx/nSubIters
             dy = Dy/nSubIters
             dt = Dt/nSubIters
+            bumped = False
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
-                robot.updateRobot(dx,dy,0)
+                if robot.rif:
+                    bump = any(robot.rif.bumpData)
+                    if bump and not lastBump:
+                        print "BUMP"
+                        bumped = True
+                        slam.newPlaceCell()
+                    lastBump = bump
+                if not bumped:
+                    robot.updateRobot(cheatFactor*dx,cheatFactor*dy,0)
+            it += 1
                 
+    #except Exception as e:
     except KeyboardInterrupt:
-	robot.rif.setV(0,0,0)
-	robot.rif.close() 
+        if robot.rif:
+            robot.rif.setV(0,0,0)
+            robot.rif.close()
+        #raise e

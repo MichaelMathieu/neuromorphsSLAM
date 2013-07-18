@@ -35,7 +35,7 @@ class RobotNetIf(ClientTCP):
       super(RobotNetIf, self).__init__()
       self.address = (ip, port)
       self.connect(ip, port)
-      self.sleepTime = 0.1
+      self.sleepTime = 0.001
       self.initSleepTime = 1
       self.maxV = 70
       self.minV = -70 
@@ -49,7 +49,9 @@ class RobotNetIf(ClientTCP):
       self.rxBuffer = str()
       self.debug = debug
       self.reset()
+      self.bumpData = [False, False, False, False, False, False] 
       time.sleep(self.initSleepTime)
+      self.setBumpStream(10)
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
@@ -57,6 +59,10 @@ class RobotNetIf(ClientTCP):
       for s in strings[:-1]:
          #print "Processing " + s
          # finished with packet, now process it
+         
+         #TODO: this should be a query func
+         if s[:4] == "-I1:":
+            self.bumpDataRecieved(s)
          for f in self.QueryFuncs:
             if self.QueryFuncs[f].regex.match(s):
 	       if self.debug:
@@ -70,6 +76,17 @@ class RobotNetIf(ClientTCP):
                print "RobotNetIf ignoring packet: " + s
       self.rxBuffer = strings[-1] # non-empty incomplete packet 
 
+   def setBumpStream(self,frequency=10):
+      self.send("!I1,%d,1\n"%(frequency), self.address)
+      
+   def bumpDataRecieved(self, s):
+      s = int(s[4:].strip().rstrip())
+      for i in range(len(self.bumpData)):
+         if s & pow(2,i):
+            self.bumpData[i] = True
+         else:
+            self.bumpData[i] = False
+      
          
    def setV(self, vX, vY, vR):
       vX = max(self.minV, min(self.maxV, int(vX)))
@@ -84,15 +101,20 @@ class RobotNetIf(ClientTCP):
    
 
    def get(self, request):
+      nTrials = 100
       val = None
       if request in self.QueryFuncs:
          func = self.QueryFuncs[request]
 	 self.send( func.queryStr, self.address)
-         while len(func.buf) == 0:
-            time.sleep(self.sleepTime) 
-         val = func.getValue()
+         for i in xrange(nTrials):
+            if len(func.buf) == 0:
+               time.sleep(self.sleepTime)
+            else:
+               val = func.getValue()
       else:
 	 print "Error - attempted to get unsupported value " + request
+      if not val:
+         val = [False, False, False, False, False, False]
       return val
    
    def reset(self):

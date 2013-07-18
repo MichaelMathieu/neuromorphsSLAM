@@ -6,7 +6,7 @@ import itertools
 import plots
 
 class VCOBank():
-    def __init__(self, dirs, nPhases, R = 40, C = 3, abs_ref = 0.001):
+    def __init__(self, dirs, nPhases, R = 40, C = 1, abs_ref = 0.001):
         self.Omega = 8.*2*math.pi
         self.nDirs = len(dirs)
         self.nPhases = nPhases
@@ -52,8 +52,8 @@ class PlaceCell():
     def update(self, gridCells, dt):
         I = 0.
         for iGridRes, iGridCell, w in self.connections:
-            if gridCells[iGridRes].outputs[iGridCell] > 40:
-                I += w * 50
+        #if gridCells[iGridRes].outputs[iGridCell] > 40:
+            I += w * gridCells[iGridRes].outputs[iGridCell]
         self.output = self.neuron.update(I, dt)
         return self.output
 
@@ -94,10 +94,10 @@ class SLAM():
         if total_incoming < len(w):
             print "No possible place cell here : No enough incomming spikes..."
             return
-        W = 1.5/total_incoming
+        W = 3./total_incoming
         connections = [(i,j,weight*W) for (i,j,weight) in connections]
         print connections
-        self.placeCells.append(PlaceCell(connections, R=100, C=1, V_th=10))
+        self.placeCells.append(PlaceCell(connections, R=60, C=1, V_th=10))
         print "New place cell  \o/"
         
     def update(self, dx, dy, dt, robot = None, gui = None):

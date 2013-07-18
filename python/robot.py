@@ -41,7 +41,7 @@ class Robot():
                           self.robotTargetWheelsPosition[1,0],
                           self.robotTargetWheelsPosition[2,0])
         
-    def update(self, dt, dtheta, dvelocity):
+    def update(self, dt, dtheta, dvelocity, bump):
         dx = 0
         dy = 0
         if self.aim[0] == "forward":
@@ -51,20 +51,23 @@ class Robot():
             self.theta += random.gauss(0, self.noise)
             nCollisions = 0
             theta0 = self.theta
-            for x1, y1, x2, y2 in self.obstacles:
-                nCollisions += self.avoidLine(x1, y1, x2, y2, dt, True)
-            if nCollisions > 1:
-                #self.aim = ("rotate", theta0 + math.pi)
-                #return 0, 0
-                self.theta = theta0 + math.pi
+            if self.rif:
+                if bump:
+                    self.theta = theta0 + math.pi
             else:
-                dx = self.velocity*dt*cos(self.theta)
-                dy = self.velocity*dt*sin(self.theta)
-                self.x += dx
-                self.y += dy
-                if self.gui:
-                    self.gui.line(self.x-dx, self.y-dy, self.x, self.y,
-                                  color=(0,0,1), width=1)
+                for x1, y1, x2, y2 in self.obstacles:
+                    nCollisions += self.avoidLine(x1, y1, x2, y2, dt, True)
+                if nCollisions > 1:
+                    #self.aim = ("rotate", theta0 + math.pi)
+                    #return 0, 0
+                    self.theta = theta0 + math.pi
+            dx = self.velocity*dt*cos(self.theta)
+            dy = self.velocity*dt*sin(self.theta)
+            self.x += dx
+            self.y += dy
+            if self.gui:
+                self.gui.line(self.x-dx, self.y-dy, self.x, self.y,
+                              color=(0,0,1), width=1)
         elif self.aim[0] == "rotate":
             #not used for now
             torotate = self.aim[1] - self.theta
