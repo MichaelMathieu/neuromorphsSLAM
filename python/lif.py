@@ -35,19 +35,19 @@ class LIFBank():
         # C in M ohms
         # all V in volts
         # all times in seconds
-        self.C = C
-        self.R = R
-        self.abs_ref = abs_ref
-        self.V_th = V_th
+        self.C = float(C)/1000
+        self.RC = float(R)*self.C
+        self.abs_ref = float(abs_ref)
+        self.V_th = float(V_th)
         self.ref = numpy.zeros(n)
         self.V = numpy.zeros(n)
         self.V_reset = 0.2 * V_th
-        self.V_spike = 50
+        self.V_spike = float(50)
 
     def update(self, I, dt):
         nrefs = self.ref < 0.
         refs = 1-nrefs
-        self.V += (-self.V/(self.R*self.C) + I/self.C)*dt*1000
+        self.V += (-self.V/self.RC + I/self.C)*dt
         self.V = self.V * (self.V > 0)
         self.ref -= dt
         self.V = nrefs*self.V + refs*self.V_reset

@@ -150,7 +150,8 @@ if __name__=="__main__":
                     robot.update( dx, dy )
             subIterActivePlaceCells.sort()
             iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
-            kvInterface.setPlaceCellStatus(iterActivePlaceCells)
+            if kvInterface:
+                kvInterface.setPlaceCellStatus(iterActivePlaceCells)
             it += 1
                 
     except KeyboardInterrupt:
