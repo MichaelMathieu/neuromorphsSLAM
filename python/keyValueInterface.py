@@ -8,8 +8,16 @@ class keyValueInterface(StreamClient):
       self.namespace = namespace
       self.velocityCmdKey = self.namespace+"/velocity" 
       self.placeCellStatusKey = self.namespace+"/spikes"
+      self.positionKey = self.namespace+"/position"
+      self.quitKey = self.namespace+"/quit"
       self.velocityRegex = re.compile("dx=(\d+\.\d+) dy=(\d+\.\d+)")   
-   
+  
+   def getQuitCmd(self):
+      return bool(self.get(self.quitKey)) 
+
+   def setQuitCmd(self, quitCmd):
+      self.set(self.quitKey, json.dumps(bool(quitCmd)))
+
    def getVelocityCmd(self):
       velocityCmdRaw = self.get(self.velocityCmdKey)
       match = self.velocityRegex.match(velocityCmdRaw)
@@ -18,7 +26,10 @@ class keyValueInterface(StreamClient):
       else:
          print "self.velocityCmdKey has not been initialized; using default values"
 	 return [0.0, 0.0]
-      
+
+   def setPosition(self, posX, posY):
+      self.set(self.positionKey, "X=%f Y=%f" % ( posX, posY ))    
+      print "Set Position X=%f Y%f" % (posX, posY)
    def setPlaceCellStatus(self, placeCellStatusRaw):
       placeCellStatus = json.dumps(placeCellStatusRaw)
       print "Converted placeCellStatusRaw to ", placeCellStatus

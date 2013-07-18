@@ -9,6 +9,7 @@ import robotNetIf
 import time 
 import argparse
 import controller
+from itertools import groupby
 from keyValueInterface import keyValueInterface
 
 def plotLines(dirs, nPhases, th_0, x_0, y_0, color=(0,1,0)):
@@ -54,15 +55,18 @@ if __name__=="__main__":
     parser.add_argument("--kvServerPort", default=21567, type=int, help="UDP port for use with the key value server")
     args = parser.parse_args()
 
+    gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
 
     kvInterface = None
     if args.kvServerIp:
         print "Connecting to Key Value server ", args.kvServerIp,":", args.kvServerPort
         kvInterface = keyValueInterface(args.kvServerIp, args.kvServerPort,"slam")
-
-    gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
-    obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]]
-    ctrl = controller.guiController(gui, obstacles)
+        kvInterface.setQuitCmd(False)
+        ctrl = controller.remoteController(gui, kvInterface)
+    else:
+        obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]]
+        ctrl = controller.guiController(gui, obstacles)
+    
     
     noise = 0.2
     x_0 = 0.5
@@ -116,14 +120,11 @@ if __name__=="__main__":
             nextTime += Dt
                 
             # Main loop : put code here
-            #if kvInterface:
-            #   Dx, Dy = kvInterface.getVelocityCmd() 
-            #else:
+            Dx, Dy = ctrl.updateControl(robot, Dt)
+             
             if it % 10 == 0:
                 if robotInterface:
                     robotInterface.setBumpStream(10)
-             
-            Dx, Dy = ctrl.updateControl(robot, Dt)
                
             dx = Dx/nSubIters
             dy = Dy/nSubIters
@@ -131,9 +132,11 @@ if __name__=="__main__":
             
             bumped = False
             
+            subIterActivePlaceCells = []
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
+                subIterActivePlaceCells += slam.getActivePlaceCells()
                 if robotInterface:
                     bump = any(robotInterface.bumpData)
                     if bump and not lastBump:
@@ -145,10 +148,14 @@ if __name__=="__main__":
                         robot.update( dx, dy )
                 else:
                     robot.update( dx, dy )
-
+            subIterActivePlaceCells.sort()
+            iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
+            kvInterface.setPlaceCellStatus(iterActivePlaceCells)
             it += 1
                 
     except KeyboardInterrupt:
-	if robotInterface:
+	if kvInterface:
+           kvInterface.setQuitCmd(True)
+        if robotInterface:
            robotInterface.setV(0,0,0)
 	   robotInterface.close() 
