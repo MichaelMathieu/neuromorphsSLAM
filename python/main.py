@@ -85,7 +85,7 @@ if __name__=="__main__":
     # robot
     robotInterface = None
     if args.robotIp:
-       robotInterface = robotNetIf.RobotNetIf(args.robotIp, args.robotPort)
+       robotInterface = robotNetIf.RobotNetIf(args.robotIp, args.robotPort, False)
        robot = robot.RealRobot(x = x_0, y = y_0, noise = noise, rif = robotInterface)
 
 
@@ -122,16 +122,15 @@ if __name__=="__main__":
             # Main loop : put code here
             Dx, Dy = ctrl.updateControl(robot, Dt)
              
-            if it % 10 == 0:
-                if robotInterface:
-                    robotInterface.setBumpStream(10)
+ #           if it % 10 == 0:
+ #               if robotInterface:
+ #                   robotInterface.setBumpStream(10)
                
             dx = Dx/nSubIters
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             
             bumped = False
-            
             subIterActivePlaceCells = []
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt/5, robot, gui)
@@ -143,11 +142,13 @@ if __name__=="__main__":
                         print "BUMP"
                         bumped = True
                         slam.newPlaceCell()
+                        break
                     lastBump = bump
-                    if not bumped:
-                        robot.update( dx, dy )
-                else:
-                    robot.update( dx, dy )
+            #        if not bumped:
+                        #robot.update( dx, dy )
+                #else:
+                    #robot.update( dx, dy )
+            robot.update(Dx,Dy)
             subIterActivePlaceCells.sort()
             iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
             if kvInterface:

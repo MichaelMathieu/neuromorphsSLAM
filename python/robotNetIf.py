@@ -52,28 +52,30 @@ class RobotNetIf(ClientTCP):
       self.bumpData = [False, False, False, False, False, False] 
       time.sleep(self.initSleepTime)
       self.setBumpStream(10)
+      self.initRecd = False
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
       strings = self.rxBuffer.split("\n")
       for s in strings[:-1]:
-         #print "Processing " + s
-         # finished with packet, now process it
-         
-         #TODO: this should be a query func
-         if s[:4] == "-I1:":
-            self.bumpDataRecieved(s)
-         for f in self.QueryFuncs:
-            if self.QueryFuncs[f].regex.match(s):
-	       if self.debug:
-                  print "Got " + f
-	       self.QueryFuncs[f].buf = s 
-            elif s.find("N-OmniRob Control") == 0:
-               if self.debug:
-                  print "Init String recd: " + s
-               self.init = True 
-            elif self.debug:
-               print "RobotNetIf ignoring packet: " + s
+         if len(s) > 1:
+            print "Processing " + s
+            # finished with packet, now process it
+            for f in self.QueryFuncs:
+               if self.QueryFuncs[f].regex.match(s):
+      	          if self.debug:
+                     print "Got " + f
+   	          self.QueryFuncs[f].buf = s 
+               elif s.find("-I1") >= 0:
+                  self.bumpDataRecieved(s)
+                  if self.debug:
+                     print "Bump Data Recd: " + s
+               elif s.find("N-OmniRob Control") >= 0:
+                  self.initRecd = True 
+                  if self.debug:
+                     print "Init String recd: " + s
+               elif self.debug:
+                  print "RobotNetIf ignoring packet: " + s
       self.rxBuffer = strings[-1] # non-empty incomplete packet 
 
    def setBumpStream(self,frequency=10):
@@ -98,6 +100,7 @@ class RobotNetIf(ClientTCP):
    def setW(self, w0, w1, w2):
       #print "!W%d,%d,%d\n" % (w0, w1, w2)
       self.send( "!W%d,%d,%d\n" % (w0, w1, w2), self.address)  
+      pass
    
 
    def get(self, request):
@@ -118,14 +121,15 @@ class RobotNetIf(ClientTCP):
       return val
    
    def reset(self):
-      self.init = False
+      print "Setting init to false"
+      self.initRecd = False
       self.send( "R\n", self.address)
       sleepCount = 0
-      while not self.init:
+      while self.initRecd == False:
          time.sleep(self.sleepTime)
          sleepCount = sleepCount + 1
-         if sleepCount % 10 == 0:
-            print "Waiting for robot init string..."
+         if sleepCount % 100 == 0:
+            print "Waiting for robot init string...", self.initRecd
         
       self.send( "!E2\n", self.address) #Disable command echo
       print "Connected to robot ", self.address
@@ -136,6 +140,11 @@ if __name__ == "__main__":
    debug = False
    r = RobotNetIf(robotIp, robotPort, debug)
   
+   i = 0
+   while True: 
+       i +=1 
+       r.setW(10+i,20+i,30+i) 
+       print r.bumpData
    #r.setW(10,20,30) 
    #print "get(Vs) ", r.get("Vs")
    #r.setV(20,0,0)
