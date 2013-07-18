@@ -11,7 +11,7 @@ class RobotAbstraction(object):
       self.rif = None
 
 class RealRobot(RobotAbstraction):
-   def __init__(self, rif, cheatFactor = 2., x = 0., y = 0., noise = 0.01):
+   def __init__(self, rif, cheatFactor = 2.2, x = 0., y = 0., noise = 0.01):
       super(RealRobot, self).__init__(x, y, noise)
       self.rif = rif 
       self.cheatFactor = cheatFactor
@@ -52,8 +52,7 @@ class RealRobot(RobotAbstraction):
       Y = [sin(a) for a in angles]
       n = sum([1 for i in angles])
       out = math.atan2(sum(Y)/n, sum(X)/n)
-      print out
-      return 0.
+      return out
 
 class SimRobot(RobotAbstraction):
    def __init__(self, x = 0., y = 0., noise = 0.01):

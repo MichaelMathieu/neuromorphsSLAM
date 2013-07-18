@@ -110,6 +110,7 @@ if __name__=="__main__":
     subIterActivePlaceCells = []
     lastBump = False
     it = 0
+    lastBumpCounter = -1
     try:
         while True:
             while gtk.events_pending():
@@ -144,6 +145,11 @@ if __name__=="__main__":
                   placeCellPositions = [ (p.x, p.y) for p in slam.placeCells]
                   kvInterface.setPlaceCellPositions(placeCellPositions)
                   print "Sending spikes: ", iterActivePlaceCells
+            if robot.rif:
+                if lastBumpCounter >= robot.rif.bumpCounter:
+                    print "We have no incoming bump stream!!!!"
+                    robot.rif.setBumpStream(10)
+                lastBumpCounter = robot.rif.bumpCounter
 
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt/5, robot, gui)

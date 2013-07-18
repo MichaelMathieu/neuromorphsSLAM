@@ -55,6 +55,7 @@ class RobotNetIf(ClientTCP):
       self.initRecd = False
       self.newBumpEvent = [False for i in xrange(6)]
       self.oldBumpEvent = [False for i in xrange(6)]
+      self.bumpCounter = 0
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
@@ -84,6 +85,7 @@ class RobotNetIf(ClientTCP):
       self.send("!I1,%d,1\n"%(frequency), self.address)
       
    def bumpDataRecieved(self, s):
+      self.bumpCounter += 1
       s = int(s[4:].strip().rstrip())
       for i in range(len(self.bumpData)):
          if s & pow(2,i):
@@ -95,6 +97,8 @@ class RobotNetIf(ClientTCP):
                            for new, old, cur in zip(self.newBumpEvent, self.oldBumpEvent,
                                                     self.bumpData)]
       self.oldBumpEvent = [cur for cur in self.bumpData]
+      #if any(self.bumpData):
+      #   print self.
   
    def setV(self, vX, vY, vR):
       vX = max(self.minV, min(self.maxV, int(vX)))
@@ -106,7 +110,6 @@ class RobotNetIf(ClientTCP):
    def setW(self, w0, w1, w2):
       #print "!W%d,%d,%d\n" % (w0, w1, w2)
       self.send( "!W%d,%d,%d\n" % (w0, w1, w2), self.address)  
-      pass
    
 
    def get(self, request):
@@ -147,10 +150,11 @@ if __name__ == "__main__":
    r = RobotNetIf(robotIp, robotPort, debug)
   
    i = 0
+   r.setBumpStream(10)
    while True: 
        i +=1 
-       r.setW(10+i,20+i,30+i) 
-       print r.get("Wi") 
+       #r.setW(10+i,20+i,30+i) 
+       print r.bumpCounter
    #r.setW(10,20,30) 
    #print "get(Vs) ", r.get("Vs")
    #r.setV(20,0,0)

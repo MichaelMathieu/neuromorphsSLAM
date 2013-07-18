@@ -19,6 +19,7 @@ class guiController(controllerAbstraction):
       self.theta = 0
       self.speed = speed
       self.theta_before_bump = self.theta
+      self.dtSinceLastBump = 0.
 
    def updateControl(self, robot, dt):
       incr_theta = 5. # in rad PER SECOND
@@ -49,9 +50,13 @@ class guiController(controllerAbstraction):
          self.theta = 2*beta-math.pi-self.theta_before_bump
          bumpFactor = 10.
          newPlaceCell = True
-         print "Bump Sensed"
+         print "Bump Sensed", self.theta_before_bump
       if not any(robot.getBumps()):
-         self.theta_before_bump = self.theta
+         self.dtSinceLastBump += dt
+         if self.dtSinceLastBump >= 0.05:
+            self.theta_before_bump = self.theta
+      if any(robot.getBumps()):
+         self.dtSinceLastBump = 0.
       dx = bumpFactor*self.speed*dt*cos(self.theta)
       dy = bumpFactor*self.speed*dt*sin(self.theta)
       if self.gui:
