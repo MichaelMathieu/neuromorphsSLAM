@@ -57,14 +57,14 @@ if __name__=="__main__":
 
     gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
 
+    obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]]
     kvInterface = None
     if args.kvServerIp:
         print "Connecting to Key Value server ", args.kvServerIp,":", args.kvServerPort
         kvInterface = keyValueInterface(args.kvServerIp, args.kvServerPort,"slam")
         kvInterface.setQuitCmd(False)
-        ctrl = controller.remoteController(gui, kvInterface)
+        ctrl = controller.remoteController(gui, obstacles, kvInterface)
     else:
-        obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]]
         ctrl = controller.guiController(gui, obstacles)
     
     
