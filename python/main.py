@@ -108,6 +108,7 @@ if __name__=="__main__":
     
     lastBump = False
     it = 0
+    lastBumpCounter = -1
     try:
         while True:
             while gtk.events_pending():
@@ -130,6 +131,12 @@ if __name__=="__main__":
 
             dxRobot = 0.
             dyRobot = 0.
+            
+            if robot.rif:
+                if lastBumpCounter >= robot.rif.bumpCounter:
+                    print "We have no incoming bump stream!!!!"
+                    robot.rif.setBumpStream(10)
+                lastBumpCounter = robot.rif.bumpCounter
 
             subIterActivePlaceCells = []
             for i in xrange(nSubIters):
