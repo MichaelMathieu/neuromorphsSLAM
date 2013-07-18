@@ -99,7 +99,7 @@ class SLAM():
             return
         W = 1.5/total_incoming
         connections = [(i,j,weight*W) for (i,j,weight) in connections]
-        print connections
+        #print connections
         placeCellId = len(self.placeCells)
         self.placeCells.append(PlaceCell(connections, R=50, C=1, V_th=9, x=x, y=y, placeCellId = placeCellId))
         print "New place cell "

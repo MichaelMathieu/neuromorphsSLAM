@@ -68,9 +68,9 @@ if __name__=="__main__":
         ctrl = controller.guiController(gui, obstacles)
     
     
-    noise = 0.2
-    x_0 = 0.5
-    y_0 = 0.5
+    noise = 0.05
+    x_0 = 0.1
+    y_0 = 0.1
     th0 = 0
     dirsBase=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
     dirsBase2=[[0,1],[math.sqrt(3.)/2,-0.5],[-math.sqrt(3.)/2,-0.5]]

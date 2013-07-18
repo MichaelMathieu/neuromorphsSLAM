@@ -18,6 +18,7 @@ class guiController(controllerAbstraction):
       self.dtheta_obs_avoidance = 0.1*math.pi
       self.theta = 0
       self.speed = speed
+      self.theta_before_bump = self.theta
 
    def updateControl(self, robot, dt):
       incr_theta = 5. # in rad PER SECOND
@@ -41,11 +42,16 @@ class guiController(controllerAbstraction):
          self.theta = theta0 + math.pi
          print "Virtual Obstacle"
          newPlaceCell = True
-      if robot.getNewBump():
-         self.theta = theta0 + math.pi
+      new_bumps = robot.getNewBumps()
+      if any(new_bumps):
+         bumps = [a or b for a,b in zip(new_bumps,robot.getBumps())]
+         beta = robot.getBumpAngle(bumps)
+         self.theta = 2*beta-math.pi-self.theta_before_bump
          bumpFactor = 10.
          newPlaceCell = True
          print "Bump Sensed"
+      if not any(robot.getBumps()):
+         self.theta_before_bump = self.theta
       dx = bumpFactor*self.speed*dt*cos(self.theta)
       dy = bumpFactor*self.speed*dt*sin(self.theta)
       if self.gui:
