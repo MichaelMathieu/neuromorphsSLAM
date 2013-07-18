@@ -119,7 +119,7 @@ if __name__=="__main__":
             nextTime += Dt
                 
             # Main loop : put code here
-            Dx, Dy = ctrl.updateControl(robot, Dt)
+            Dx, Dy, newPlaceCell = ctrl.updateControl(robot, Dt)
              
  #           if it % 10 == 0:
  #               if robotInterface:
@@ -129,10 +129,8 @@ if __name__=="__main__":
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             
-            if robotInterface:
-               if robotInterface.newBumpEvent:
-                   print "BUMP"
-                   slam.newPlaceCell()
+            if newPlaceCell:
+               slam.newPlaceCell()
 
             subIterActivePlaceCells = []
             for i in xrange(nSubIters):

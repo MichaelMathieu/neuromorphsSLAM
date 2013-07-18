@@ -32,21 +32,25 @@ class guiController(controllerAbstraction):
       self.theta += dtheta * dt
       self.theta += random.gauss(0, robot.noise)
       nCollisions = 0
+      newPlaceCell = False
       theta0 = self.theta
       for x1, y1, x2, y2 in self.obstacles:
          nCollisions += self.avoidLine(x1, y1, x2, y2, dt, robot, True)
       if nCollisions > 1:
          self.theta = theta0 + math.pi
          print "Virtual Obstacle"
+         newPlaceCell = True
       if not robot.rif == None and robot.rif.newBumpEvent:
          self.theta = theta0 + math.pi
+         robot.rif.newBumpEvent = False
+         newPlaceCell = True
          print "Bump Sensed"
       dx = self.speed*dt*cos(self.theta)
       dy = self.speed*dt*sin(self.theta)
       if self.gui:
          self.gui.line(robot.x, robot.y, robot.x+dx, robot.y+dy,
                        color=(0,0,1), width=1)
-      return dx, dy
+      return dx, dy, newPlaceCell
 
    def avoidLine(self, x1, y1, x2, y2, dt, robot, smooth = True):
         a = y2-y1

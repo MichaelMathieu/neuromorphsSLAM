@@ -54,6 +54,7 @@ class RobotNetIf(ClientTCP):
       self.setBumpStream(10)
       self.initRecd = False
       self.newBumpEvent = False
+      self.oldBumpEvent = False
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
@@ -89,11 +90,18 @@ class RobotNetIf(ClientTCP):
             self.bumpData[i] = True
          else:
             self.bumpData[i] = False
-      if not self.newBumpEvent and any(self.bumpData):
-         self.newBumpEvent = True
-      else:
-         self.newBumpEvent = False
          
+      if not self.newBumpEvent and not self.oldBumpEvent and any(self.bumpData):
+         self.newBumpEvent = True
+         print "NewBump!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1"
+      elif self.newBumpEvent and not self.oldBumpEvent and any(self.bumpData):
+         #self.newBumpEvent = False
+         self.oldBumpEvent = True
+         print "OldBump"
+      elif self.oldBumpEvent and not any(self.bumpData):
+         self.oldBumpEvent = False
+         print "Clearing bump"
+  
    def setV(self, vX, vY, vR):
       vX = max(self.minV, min(self.maxV, int(vX)))
       vY = max(self.minV, min(self.maxV, int(vY)))
