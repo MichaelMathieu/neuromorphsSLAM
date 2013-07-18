@@ -43,11 +43,14 @@ class GridCellBank():
         return self.outputs
 
 class PlaceCell():
-    def __init__(self, connections, R = 40, C = 1, abs_ref = 0.005, V_th = 10):
+    def __init__(self, connections, R = 40, C = 1, abs_ref = 0.005, V_th = 10, x = 0., y = 0., placeCellId = 0 ):
         # connections : [(iGridResolution, iGridCell, w)]
         self.connections = connections
         self.neuron = lif.LIF(R=R, C=C, abs_ref=abs_ref, V_th = V_th)
         self.output = 0.
+        self.placeCellId = placeCellId
+        self.x = x
+        self.y = y
         
     def update(self, gridCells, dt):
         I = 0.
@@ -71,6 +74,7 @@ class SLAM():
                           in zip(VCOblocks, gridCellsCo, gridCellsConstants)]
         # Place cells
         self.placeCells = []
+        self.placeCellPos = []
         self.winSize = 200 #TODO: dt
         self.iWin = 0
         self.gridCellsSpikes = [numpy.zeros([gc.nGridCells, self.winSize]) \
@@ -78,11 +82,11 @@ class SLAM():
         self.it = 0
         self.placeCellsToPut = []
 
-    def newPlaceCell(self):
-        self.placeCellsToPut.append(self.it+self.winSize/2)
+    def newPlaceCell(self, x, y):
+        self.placeCellsToPut.append((self.it+self.winSize/2, x, y))
 
-    def newPlaceCellDephased(self):
-        w = [x.sum(1) for x in self.gridCellsSpikes]
+    def newPlaceCellDephased(self, x, y ):
+        w = [xx.sum(1) for xx in self.gridCellsSpikes]
         connections = []
         total_incoming = 0.
         for i in xrange(len(w)):
@@ -96,8 +100,9 @@ class SLAM():
         W = 1.5/total_incoming
         connections = [(i,j,weight*W) for (i,j,weight) in connections]
         print connections
-        self.placeCells.append(PlaceCell(connections, R=50, C=1, V_th=9))
-        print "New place cell  \o/"
+        placeCellId = len(self.placeCells)
+        self.placeCells.append(PlaceCell(connections, R=50, C=1, V_th=9, x=x, y=y, placeCellId = placeCellId))
+        print "New place cell "
         
     def update(self, dx, dy, dt, robot = None, gui = None):
         # VCO + Grid cells
@@ -109,9 +114,9 @@ class SLAM():
         for pc in self.placeCells:
             pc.update(self.gridCells, dt)
         self.iWin = (self.iWin + 1) % self.winSize
-        for placeCellToPut in self.placeCellsToPut:
+        for (placeCellToPut, x, y) in self.placeCellsToPut:
             if placeCellToPut == self.it:
-                self.newPlaceCellDephased()
+                self.newPlaceCellDephased(x,y)
         self.it += 1
         
         # debug

@@ -6,6 +6,7 @@ class keyValueInterface(StreamClient):
    def __init__(self, host, port, namespace="slam"):
       super(keyValueInterface, self).__init__(host, port)
       self.namespace = namespace
+      self.placeCellPositionKey = self.namespace+"/placeCellPos"
       self.placeCellStatusKey = self.namespace+"/spikes"
       self.positionKey = self.namespace+"/position"
       self.quitKey = self.namespace+"/quit"
@@ -19,7 +20,10 @@ class keyValueInterface(StreamClient):
    def setPosition(self, posX, posY):
       self.set(self.positionKey, "X=%f Y=%f" % ( posX, posY ))    
       #print "Set Position X=%f Y%f" % (posX, posY)
-
+   
+   def setPlaceCellPositions(self, positionMatrix):
+      print "Set place cell positions ", positionMatrix
+      self.set(self.placeCellPositionKey, json.dumps(positionMatrix))    
    def setPlaceCellStatus(self, placeCellStatusRaw):
       placeCellStatus = json.dumps(placeCellStatusRaw)
       #print "Converted placeCellStatusRaw to ", placeCellStatus

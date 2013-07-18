@@ -42,7 +42,7 @@ def placeCellCreation(slam):
         gtk.main_iteration()
     space = gui.keyState("space")
     if space and not lastNewPlaceCell:
-        slam.newPlaceCell()
+        slam.newPlaceCell(robot.x, robot.y)
         lastNewPlaceCell = True
     if not space:
         lastNewPlaceCell = False
@@ -121,16 +121,12 @@ if __name__=="__main__":
             # Main loop : put code here
             Dx, Dy, newPlaceCell = ctrl.updateControl(robot, Dt)
              
- #           if it % 10 == 0:
- #               if robotInterface:
- #                   robotInterface.setBumpStream(10)
-               
             dx = Dx/nSubIters
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             
             if newPlaceCell:
-               slam.newPlaceCell()
+               slam.newPlaceCell(robot.x, robot.y)
 
             dxRobot = 0.
             dyRobot = 0.
@@ -150,6 +146,8 @@ if __name__=="__main__":
             iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
             if kvInterface:
                 kvInterface.setPlaceCellStatus(iterActivePlaceCells)
+                placeCellPositions = [ (p.x, p.y) for p in slam.placeCells]
+                kvInterface.setPlaceCellPositions(placeCellPositions)
             it += 1
                 
     except KeyboardInterrupt:
