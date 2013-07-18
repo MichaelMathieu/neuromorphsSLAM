@@ -24,6 +24,7 @@ class guiController(controllerAbstraction):
       dtheta = 0.
       dx = 0
       dy = 0
+      newPlaceCell = False
       if self.gui.keyState("Left"):
          dtheta -= incr_theta * dt
       if self.gui.keyState("Right"):
@@ -32,7 +33,6 @@ class guiController(controllerAbstraction):
       self.theta += dtheta * dt
       self.theta += random.gauss(0, robot.noise)
       nCollisions = 0
-      newPlaceCell = False
       theta0 = self.theta
       for x1, y1, x2, y2 in self.obstacles:
          nCollisions += self.avoidLine(x1, y1, x2, y2, dt, robot, True)
