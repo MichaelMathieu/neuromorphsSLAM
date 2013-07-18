@@ -82,7 +82,6 @@ class SLAM():
         self.placeCellsToPut.append(self.it+self.winSize/2)
 
     def newPlaceCellDephased(self):
-        #TODO: this is not centered
         w = [x.sum(1) for x in self.gridCellsSpikes]
         connections = []
         total_incoming = 0.
@@ -136,5 +135,7 @@ class SLAM():
                 if pc.output > 40:
                     print "PC: " + str(i) + " spiking"
                     gui.point(robot.x, robot.y, color=placeCellColors[i%len(placeCellColors)], width=5)
-        
+       
+    def getActivePlaceCells(self):
+        return [ i for i in xrange(len(self.placeCells)) if self.placeCells[i].output > 40 ]  
                 

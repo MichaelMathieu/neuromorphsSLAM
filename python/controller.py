@@ -10,6 +10,19 @@ class controllerAbstraction(object):
       print "Should not use the abstract method"
       exit(-1)
 
+class remoteController(controllerAbstraction):
+   def __init__(self, gui, keyValueInterface ):
+      self.gui = gui
+      self.kvInterface = keyValueInterface
+
+   def updateControl(self, robot, dt):
+      dx, dy = self.kvInterface.getVelocityCmd() 
+      self.kvInterface.setPosition(robot.x, robot.y)
+      if self.gui:
+         self.gui.line(robot.x, robot.y, robot.x+dx, robot.y+dy,
+                       color=(0,0,1), width=1)
+      return dx, dy
+
 class guiController(controllerAbstraction):
    def __init__(self, gui, obstacles, speed = 0.033):
       self.gui = gui
