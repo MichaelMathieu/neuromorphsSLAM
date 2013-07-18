@@ -18,11 +18,11 @@ class keyValueInterface(StreamClient):
 
    def setPosition(self, posX, posY):
       self.set(self.positionKey, "X=%f Y=%f" % ( posX, posY ))    
-      print "Set Position X=%f Y%f" % (posX, posY)
+      #print "Set Position X=%f Y%f" % (posX, posY)
 
    def setPlaceCellStatus(self, placeCellStatusRaw):
       placeCellStatus = json.dumps(placeCellStatusRaw)
-      print "Converted placeCellStatusRaw to ", placeCellStatus
+      #print "Converted placeCellStatusRaw to ", placeCellStatus
       self.set(self.placeCellStatusKey, placeCellStatus)
   
 if __name__ == "__main__":
