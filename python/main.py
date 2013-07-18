@@ -11,7 +11,7 @@ import argparse
 from keyValueInterface import keyValueInterface
 
 def controller(gui):
-    incr_theta = 3. # in rad PER SECOND
+    incr_theta = 5. # in rad PER SECOND
     incr_velocity = 0.1 # in meter (the world is 1m wide) per second square
     dtheta = 0.
     dvelocity = 0.
@@ -100,7 +100,8 @@ if __name__=="__main__":
 
     # robot
     noise = 0
-    robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0, noise = noise, velocity = 0.22, rif=robotInterface)
+    robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0, noise = noise,
+                        velocity = 0.1, rif=robotInterface)
     # SLAM
     constants = [(6.1, 1.76, 0.001), (5., 1.2, 0.001)]
     dirs = [(x,nph) for x,nph in zip(dirs,nPhases)]
@@ -108,21 +109,28 @@ if __name__=="__main__":
 
     # Number of sub-iterations (neuron timesteps per robot timestep)
     nSubIters = 100
+    Dt = 0.25
+    nextTime = time.time()+Dt
     try:
         while True:
             while gtk.events_pending():
                 gtk.main_iteration()
+            currentTime = time.time()
+            sleepingTime = max(0, nextTime-currentTime)
+            #print "Sleeping " + str(sleepingTime)
+            time.sleep(sleepingTime)
+            nextTime += Dt
                 
             # Main loop : put code here
             dtheta, dvelocity = controller(gui)
-            Dt = 0.05
-            Dx, Dy = robot.update(dt = Dt, dtheta = dtheta, dvelocity = dvelocity)
+            Dx, Dy = robot.update(dt = Dt, dtheta = dtheta*Dt, dvelocity = dvelocity)
             dx = Dx/nSubIters
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             for i in xrange(nSubIters):
-                slam.update(dx, dy, dt, robot, gui)
+                slam.update(dx, dy, dt/10, robot, gui)
                 placeCellCreation(slam)
+                robot.updateRobot(dx,dy,0)
                 
     except KeyboardInterrupt:
 	robot.rif.setV(0,0,0)
