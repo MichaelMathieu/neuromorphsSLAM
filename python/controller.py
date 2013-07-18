@@ -16,7 +16,7 @@ class guiController(controllerAbstraction):
       self.obstacles = obstacles
       self.dtheta_obs_avoidance = 0.1*math.pi
       self.theta = 0
-      self.speed = 0.025
+      self.speed = 0.033
 
    def updateControl(self, robot, dt):
         incr_theta = 5. # in rad PER SECOND

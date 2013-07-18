@@ -6,7 +6,7 @@ import itertools
 import plots
 
 class VCOBank():
-    def __init__(self, dirs, nPhases, R = 40, C = 3, abs_ref = 0.001):
+    def __init__(self, dirs, nPhases, R = 40, C = 1, abs_ref = 0.001):
         self.Omega = 8.*2*math.pi
         self.nDirs = len(dirs)
         self.nPhases = nPhases
@@ -24,7 +24,7 @@ class VCOBank():
 
 class GridCellBank():
     def __init__(self, nDirs, nPhases, connectionGrid,
-                 R = 6., C = 1.4, abs_ref = 0.001, one_weight = 1./15):
+                 R = 6., C = 1.4, abs_ref = 0.001, one_weight = 1./12):
         self.nDirs = nDirs
         self.nPhases = nPhases
         self.nGridCells = len(connectionGrid)
@@ -52,8 +52,8 @@ class PlaceCell():
     def update(self, gridCells, dt):
         I = 0.
         for iGridRes, iGridCell, w in self.connections:
-            if gridCells[iGridRes].outputs[iGridCell] > 40:
-                I += w * 50
+        #if gridCells[iGridRes].outputs[iGridCell] > 40:
+            I += w * gridCells[iGridRes].outputs[iGridCell]
         self.output = self.neuron.update(I, dt)
         return self.output
 
@@ -94,10 +94,10 @@ class SLAM():
         if total_incoming < len(w):
             print "No possible place cell here : No enough incomming spikes..."
             return
-        W = 1.5/total_incoming
+        W = 3./total_incoming
         connections = [(i,j,weight*W) for (i,j,weight) in connections]
         print connections
-        self.placeCells.append(PlaceCell(connections, R=100, C=1, V_th=10))
+        self.placeCells.append(PlaceCell(connections, R=60, C=1, V_th=10))
         print "New place cell  \o/"
         
     def update(self, dx, dy, dt, robot = None, gui = None):
@@ -116,15 +116,15 @@ class SLAM():
         self.it += 1
         
         # debug
-        # colorsBase = [0.,0.33,0.67,1.]
-        # #colorsBase = [0.,0.125,0.25,0.5,0.75,0.875,1.]
+        colorsBase = [0.,0.33,0.67,1.]
+        #colorsBase = [0.,0.125,0.25,0.5,0.75,0.875,1.]
         # colors = [i for i in itertools.product(colorsBase, colorsBase, colorsBase)]
         # if (robot != None) and (gui != None):
         #     for i in xrange(len(self.gridCells)):
         #         pc = self.gridCells[i]
         #         for j in xrange(pc.nGridCells):
         #             if pc.outputs[j] > 40:
-        #                 if i == 0:
+        #                 if i == 1:
         #                     print str(i) + "," + str(j) + " spiking"
         #                     gui.point(robot.x, robot.y, color=tuple(colors[j%len(colors)]), width=i+3)
 
@@ -135,6 +135,6 @@ class SLAM():
                 pc = self.placeCells[i]
                 if pc.output > 40:
                     print "PC: " + str(i) + " spiking"
-                    gui.point(robot.x, robot.y, color=placeCellColors[i], width=5)
+                    gui.point(robot.x, robot.y, color=placeCellColors[i%len(placeCellColors)], width=5)
         
                 

@@ -10,15 +10,13 @@ class RobotAbstraction(object):
       self.noise = noise
 
 class RealRobot(RobotAbstraction):
-   def __init__(self, rif, x = 0., y = 0., noise = 0.01):
+   def __init__(self, rif, cheatFactor = 2., x = 0., y = 0., noise = 0.01):
       super(RealRobot, self).__init__(x, y, noise)
       self.rif = rif 
-      self.initRobot()
-      
-   def initRobot(self):
+      self.cheatFactor = cheatFactor
       alpha = 206.6
       wheelradius = 0.0225
-      beta = 360./(math.pi*2.*wheelradius)
+      beta = 360./(math.pi*2.*wheelradius) * self.cheatFactor
       self.robotCoordinateMatrix = numpy.matrix(
           [[-beta*math.sqrt(3)/2, -beta*0.5, alpha],
            [                   0,      beta, alpha],
