@@ -64,13 +64,13 @@ if __name__=="__main__":
     obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]]
     ctrl = controller.guiController(gui, obstacles)
     
-    noise = 0
+    noise = 0.2
     x_0 = 0.5
     y_0 = 0.5
     th0 = 0
     dirsBase=[[1,0],[-0.5,math.sqrt(3.)/2],[-0.5,-math.sqrt(3.)/2]]
     dirsBase2=[[0,1],[math.sqrt(3.)/2,-0.5],[-math.sqrt(3.)/2,-0.5]]
-    factors = [0.7,1.4]
+    factors = [0.6,1.2]
     dirs = [[[x*k,y*k] for x,y in dirsBase] for k in factors]
     dirs += [[[x*k,y*k] for x,y in dirsBase2] for k in factors]
     nPhases = [16,16,16,16]

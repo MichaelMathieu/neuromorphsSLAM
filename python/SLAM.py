@@ -94,10 +94,10 @@ class SLAM():
         if total_incoming < len(w):
             print "No possible place cell here : No enough incomming spikes..."
             return
-        W = 2./total_incoming
+        W = 1.5/total_incoming
         connections = [(i,j,weight*W) for (i,j,weight) in connections]
         print connections
-        self.placeCells.append(PlaceCell(connections, R=60, C=1, V_th=10))
+        self.placeCells.append(PlaceCell(connections, R=50, C=1, V_th=9))
         print "New place cell  \o/"
         
     def update(self, dx, dy, dt, robot = None, gui = None):
@@ -116,8 +116,8 @@ class SLAM():
         self.it += 1
         
         # debug
-        colorsBase = [0.,0.33,0.67,1.]
         #colorsBase = [0.,0.125,0.25,0.5,0.75,0.875,1.]
+        #colorsBase = [0.,0.33,0.67,1.]
         # colors = [i for i in itertools.product(colorsBase, colorsBase, colorsBase)]
         # if (robot != None) and (gui != None):
         #     for i in xrange(len(self.gridCells)):
@@ -128,8 +128,9 @@ class SLAM():
         #                     print str(i) + "," + str(j) + " spiking"
         #                     gui.point(robot.x, robot.y, color=tuple(colors[j%len(colors)]), width=i+3)
 
-        colorsBase = [0,1]
-        placeCellColors = [i for i in itertools.product(colorsBase,colorsBase,colorsBase)]
+        colorsBase = [0,0.5,1]
+        placeCellColors = [i for i in itertools.product(colorsBase,colorsBase,colorsBase) \
+                           if i != (1,1,1)]
         if (robot != None) and (gui != None):
             for i in xrange(len(self.placeCells)):
                 pc = self.placeCells[i]
