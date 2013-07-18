@@ -8,22 +8,8 @@ import sys
 import robotNetIf
 import time 
 import argparse
+import controller
 from keyValueInterface import keyValueInterface
-
-def controller(gui):
-    incr_theta = 5. # in rad PER SECOND
-    incr_velocity = 0.1 # in meter (the world is 1m wide) per second square
-    dtheta = 0.
-    dvelocity = 0.
-    if gui.keyState("Left"):
-        dtheta -= incr_theta
-    if gui.keyState("Right"):
-        dtheta += incr_theta
-    if gui.keyState("Up"):
-        dvelocity += incr_velocity
-    if gui.keyState("Down"):
-        dvelocity -= incr_velocity
-    return dtheta, dvelocity
 
 def plotLines(dirs, nPhases, th_0, x_0, y_0, color=(0,1,0)):
     #TODO: only works with regularly samples dirs
@@ -68,22 +54,17 @@ if __name__=="__main__":
     parser.add_argument("--kvServerPort", default=21567, type=int, help="UDP port for use with the key value server")
     args = parser.parse_args()
 
-    robotInterface = None
-    if args.robotIp:
-       robotInterface = robotNetIf.RobotNetIf(args.robotIp, args.robotPort)
-
-    else:
-       print "Using simulated robot"
 
     kvInterface = None
     if args.kvServerIp:
         print "Connecting to Key Value server ", args.kvServerIp,":", args.kvServerPort
         kvInterface = keyValueInterface(args.kvServerIp, args.kvServerPort,"slam")
 
-    
-
     gui = display.GUI(scale = 400., wpixels = 400., hpixels=400.)
-
+    obstacles = [[0,0,1,0],[1,0,1,1],[1,1,0,1],[0,1,0,0]]
+    ctrl = controller.guiController(gui, obstacles)
+    
+    noise = 0
     x_0 = 0.5
     y_0 = 0.5
     th0 = 0
@@ -96,9 +77,16 @@ if __name__=="__main__":
     #    plotLines(dirs0, nph, th0, x_0, y_0, color = color)
 
     # robot
-    noise = 0
-    robot = robot.Robot(gui=gui, x = x_0, y = y_0, theta = th0, noise = noise,
-                        velocity = 0.1, rif=robotInterface)
+    robotInterface = None
+    if args.robotIp:
+       robotInterface = robotNetIf.RobotNetIf(args.robotIp, args.robotPort)
+       robot = robot.RealRobot(x = x_0, y = y_0, noise = noise, rif = robotInterface)
+
+
+    else:
+       print "Using simulated robot"
+       robot = robot.SimRobot(x = x_0, y = y_0, noise = noise)
+    
     # SLAM
     constants = [(6.1, 1.76, 0.001), (5., 1.2, 0.001)]
     dirs = [(x,nph) for x,nph in zip(dirs,nPhases)]
@@ -119,16 +107,23 @@ if __name__=="__main__":
             nextTime += Dt
                 
             # Main loop : put code here
-            dtheta, dvelocity = controller(gui)
-            Dx, Dy = robot.update(dt = Dt, dtheta = dtheta*Dt, dvelocity = dvelocity)
+            #dtheta, dvelocity = controller(gui)
+            #if kvInterface:
+            #   Dx, Dy = kvInterface.getVelocityCmd() 
+            #else:
+            
+            Dx, Dy = ctrl.updateControl(robot, Dt)
+               
             dx = Dx/nSubIters
             dy = Dy/nSubIters
             dt = Dt/nSubIters
+            
             for i in xrange(nSubIters):
-                slam.update(dx, dy, dt/10, robot, gui)
+                slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
-                robot.updateRobot(dx,dy,0)
+                robot.update( dx, dy )
                 
     except KeyboardInterrupt:
-	robot.rif.setV(0,0,0)
-	robot.rif.close() 
+	if robot.rif:
+           robot.rif.setV(0,0,0)
+	   robot.rif.close() 
