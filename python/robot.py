@@ -37,8 +37,10 @@ class RealRobot(RobotAbstraction):
       self.y += dy
       return self.x, self.y
 
-   def getBumpSensors(self):
-      return self.rif.bumpData
+   def getNewBump(self):
+      out =  self.rif.newBumpEvent
+      self.rif.newBumpEvent = False
+      return out
 
 class SimRobot(RobotAbstraction):
    def __init__(self, x = 0., y = 0., noise = 0.01):
@@ -49,5 +51,5 @@ class SimRobot(RobotAbstraction):
       self.y += dy
       return self.x, self.y
 
-   def getBumpSensors(self):
-      return [False for i in xrange(6)]
+   def getNewBump(self):
+      return False

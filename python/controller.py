@@ -24,6 +24,7 @@ class guiController(controllerAbstraction):
       dtheta = 0.
       dx = 0
       dy = 0
+      bumpFactor = 1.
       if self.gui.keyState("Left"):
          dtheta -= incr_theta * dt
       if self.gui.keyState("Right"):
@@ -40,13 +41,13 @@ class guiController(controllerAbstraction):
          self.theta = theta0 + math.pi
          print "Virtual Obstacle"
          newPlaceCell = True
-      if not robot.rif == None and robot.rif.newBumpEvent:
+      if robot.getNewBump():
          self.theta = theta0 + math.pi
-         robot.rif.newBumpEvent = False
+         bumpFactor = 10.
          newPlaceCell = True
          print "Bump Sensed"
-      dx = self.speed*dt*cos(self.theta)
-      dy = self.speed*dt*sin(self.theta)
+      dx = bumpFactor*self.speed*dt*cos(self.theta)
+      dy = bumpFactor*self.speed*dt*sin(self.theta)
       if self.gui:
          self.gui.line(robot.x, robot.y, robot.x+dx, robot.y+dy,
                        color=(0,0,1), width=1)

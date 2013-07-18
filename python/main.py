@@ -132,12 +132,20 @@ if __name__=="__main__":
             if newPlaceCell:
                slam.newPlaceCell()
 
+            dxRobot = 0.
+            dyRobot = 0.
+
             subIterActivePlaceCells = []
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
                 subIterActivePlaceCells += slam.getActivePlaceCells()
-            robot.update(Dx,Dy)
+                dxRobot += dx
+                dyRobot += dy
+                if i % 10 == 0:
+                    robot.update(dxRobot,dyRobot)
+                    dxRobot = 0.
+                    dyRobot = 0.
             subIterActivePlaceCells.sort()
             iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
             if kvInterface:
