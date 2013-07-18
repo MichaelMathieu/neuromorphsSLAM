@@ -36,6 +36,7 @@ class RobotNetIf(ClientTCP):
       self.address = (ip, port)
       self.connect(ip, port)
       self.sleepTime = 0.1
+      self.initSleepTime = 1
       self.maxV = 70
       self.minV = -70 
       self.QueryFuncs = { 
@@ -48,20 +49,22 @@ class RobotNetIf(ClientTCP):
       self.rxBuffer = str()
       self.debug = debug
       self.reset()
-      time.sleep(self.sleepTime+2)
+      time.sleep(self.initSleepTime)
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
       strings = self.rxBuffer.split("\n")
       for s in strings[:-1]:
-         print "Processing " + s
+         #print "Processing " + s
          # finished with packet, now process it
          for f in self.QueryFuncs:
             if self.QueryFuncs[f].regex.match(s):
-	       print "Got " + f
+	       if self.debug:
+                  print "Got " + f
 	       self.QueryFuncs[f].buf = s 
             elif s.find("N-OmniRob Control") == 0:
-               print "Init String recd: " + s
+               if self.debug:
+                  print "Init String recd: " + s
                self.init = True 
             elif self.debug:
                print "RobotNetIf ignoring packet: " + s
@@ -95,10 +98,15 @@ class RobotNetIf(ClientTCP):
    def reset(self):
       self.init = False
       self.send( "R\n", self.address)
-      print "Waiting for robot init string..."
+      sleepCount = 0
       while not self.init:
-         time.sleep(self.sleepTime) 
+         time.sleep(self.sleepTime)
+         sleepCount = sleepCount + 1
+         if sleepCount % 10 == 0:
+            print "Waiting for robot init string..."
+        
       self.send( "!E2\n", self.address) #Disable command echo
+      print "Connected to robot ", self.address
       
 if __name__ == "__main__":
    robotIp = "10.1.95.57"

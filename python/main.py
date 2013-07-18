@@ -71,9 +71,6 @@ if __name__=="__main__":
     robotInterface = None
     if args.robotIp:
        robotInterface = robotNetIf.RobotNetIf(args.robotIp, args.robotPort)
-       robotInterface.reset()
-       #Just to make sure the reset is done before we start
-       time.sleep(1)
 
     else:
        print "Using simulated robot"
