@@ -8,6 +8,7 @@ class RobotAbstraction(object):
       self.x = x
       self.y = y
       self.noise = noise
+      self.rif = None
 
 class RealRobot(RobotAbstraction):
    def __init__(self, rif, cheatFactor = 2., x = 0., y = 0., noise = 0.01):
@@ -22,6 +23,7 @@ class RealRobot(RobotAbstraction):
           [                   0,      beta, alpha],
           [ beta*math.sqrt(3)/2, -beta*0.5, alpha]])
       self.robotTargetWheelsPosition = numpy.matrix(self.rif.get("Wi"),dtype='float').T
+      print "initial wheelPos ", self.robotTargetWheelsPosition
       
    def update(self, dx, dy):
       dtheta = 0

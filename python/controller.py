@@ -38,7 +38,7 @@ class guiController(controllerAbstraction):
       if nCollisions > 1:
          self.theta = theta0 + math.pi
          print "Virtual Obstacle"
-      if any(robot.getBumpSensors()):
+      if not robot.rif == None and robot.rif.newBumpEvent:
          self.theta = theta0 + math.pi
          print "Bump Sensed"
       dx = self.speed*dt*cos(self.theta)

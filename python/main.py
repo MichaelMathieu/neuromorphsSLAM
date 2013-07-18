@@ -107,7 +107,6 @@ if __name__=="__main__":
     nextTime = time.time()+Dt
     
     lastBump = False
-    bumped = False
     it = 0
     try:
         while True:
@@ -130,24 +129,16 @@ if __name__=="__main__":
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             
-            bumped = False
+            if robotInterface:
+               if robotInterface.newBumpEvent:
+                   print "BUMP"
+                   slam.newPlaceCell()
+
             subIterActivePlaceCells = []
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
                 subIterActivePlaceCells += slam.getActivePlaceCells()
-                if robotInterface:
-                    bump = any(robotInterface.bumpData)
-                    if bump and not lastBump:
-                        print "BUMP"
-                        bumped = True
-                        slam.newPlaceCell()
-                        break
-                    lastBump = bump
-            #        if not bumped:
-                        #robot.update( dx, dy )
-                #else:
-                    #robot.update( dx, dy )
             robot.update(Dx,Dy)
             subIterActivePlaceCells.sort()
             iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]

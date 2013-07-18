@@ -1,7 +1,7 @@
 from network_client import ClientTCP
 import time
 import re
-
+import numpy 
 class RobotFunc(object):
    def __init__(self, queryStr, regexStr, regexGroups, dataType):
       self.queryStr = queryStr
@@ -53,13 +53,14 @@ class RobotNetIf(ClientTCP):
       time.sleep(self.initSleepTime)
       self.setBumpStream(10)
       self.initRecd = False
+      self.newBumpEvent = False
 
    def data_received(self, data, address):
       self.rxBuffer = self.rxBuffer + data
       strings = self.rxBuffer.split("\n")
       for s in strings[:-1]:
-         if len(s) > 1:
-            print "Processing " + s
+         if len(s) > 0:
+            #print "Processing " + s
             # finished with packet, now process it
             for f in self.QueryFuncs:
                if self.QueryFuncs[f].regex.match(s):
@@ -88,7 +89,10 @@ class RobotNetIf(ClientTCP):
             self.bumpData[i] = True
          else:
             self.bumpData[i] = False
-      
+      if not self.newBumpEvent and any(self.bumpData):
+         self.newBumpEvent = True
+      else:
+         self.newBumpEvent = False
          
    def setV(self, vX, vY, vR):
       vX = max(self.minV, min(self.maxV, int(vX)))
@@ -117,7 +121,7 @@ class RobotNetIf(ClientTCP):
       else:
 	 print "Error - attempted to get unsupported value " + request
       if not val:
-         val = [False, False, False, False, False, False]
+         val = numpy.zeros( func.regexGroups)
       return val
    
    def reset(self):
@@ -144,7 +148,7 @@ if __name__ == "__main__":
    while True: 
        i +=1 
        r.setW(10+i,20+i,30+i) 
-       print r.bumpData
+       print r.get("Wi") 
    #r.setW(10,20,30) 
    #print "get(Vs) ", r.get("Vs")
    #r.setV(20,0,0)
