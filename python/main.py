@@ -134,6 +134,8 @@ if __name__=="__main__":
             dxRobot = 0.
             dyRobot = 0.
             
+            gui.save("images/%06d.png"%it)
+            
             if it % matlabSlowFactor == 0:
                subIterActivePlaceCells.sort()
                iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]

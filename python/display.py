@@ -27,6 +27,9 @@ class GUI(object):
         self.main_window.connect("key-release-event", self.on_key_released)
         self.keyboard_state = {}
 
+    def save(self, filename):
+        self.surface.write_to_png(filename)
+
     def create_window(self):
         self.main_window = gtk.Window(type=gtk.WINDOW_TOPLEVEL)
         self.main_window.connect("destroy", self.main_quit)
