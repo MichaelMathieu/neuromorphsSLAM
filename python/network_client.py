@@ -21,10 +21,12 @@
 import socket
 import threading
 import Queue
+import time
 
 debug = False
 timeout = 0.1
 max_size = 1024
+log = False
 
 class ClientTCPSender(threading.Thread):
     def __init__(self, connection):
@@ -95,6 +97,8 @@ class ClientTCP(object):
     def __init__(self):
         self.socket = None
         self.connections = {}
+        if log:
+            self.log = open("log", "w")
 
     def connect(self, address, port):
         try:
@@ -123,12 +127,16 @@ class ClientTCP(object):
     def data_received(self, data, address):
         if debug:
             print "Client has received data from", address
+        if log:
+            self.log.write("R[%f"%(time.time())+"] " + data + "\n")
 
     def send(self, data, address):
 #        if debug:
 #            print "Client has sent data to", address
         if address in self.connections:
             self.connections[address].send(data)
+        if log:
+            self.log.write("S[%f"%(time.time())+"] " + data + "\n")
 
     def close_connection(self, address):
         if address in self.connections:
@@ -137,6 +145,8 @@ class ClientTCP(object):
     def close(self):
         for co in self.connections.values():
             co.stop()
+        if log:
+            self.log.close()
 
 if __name__ == "__main__":
     c = ClientTCP()

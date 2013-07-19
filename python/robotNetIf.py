@@ -58,6 +58,7 @@ class RobotNetIf(ClientTCP):
       self.bumpCounter = 0
 
    def data_received(self, data, address):
+      super(RobotNetIf, self).data_received(data, address)
       self.rxBuffer = self.rxBuffer + data
       strings = self.rxBuffer.split("\n")
       for s in strings[:-1]:
@@ -140,7 +141,7 @@ class RobotNetIf(ClientTCP):
          if sleepCount % 100 == 0:
             print "Waiting for robot init string...", self.initRecd
         
-      self.send( "!E2\n", self.address) #Disable command echo
+      #self.send( "!E2\n", self.address) #Disable command echo
       print "Connected to robot ", self.address
       
 if __name__ == "__main__":
