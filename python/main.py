@@ -128,7 +128,7 @@ if __name__=="__main__":
             dy = Dy/nSubIters
             dt = Dt/nSubIters
             
-            if newPlaceCell:
+            if newPlaceCell or it % 20 == 0:
                slam.newPlaceCell(robot.x, robot.y)
 
             dxRobot = 0.
