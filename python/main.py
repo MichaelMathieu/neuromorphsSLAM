@@ -110,7 +110,9 @@ if __name__=="__main__":
     subIterActivePlaceCells = []
     lastBump = False
     it = 0
+    iimg = 0
     lastBumpCounter = -1
+    nextImgTime = time.time() + Dt
     try:
         while True:
             while gtk.events_pending():
@@ -134,8 +136,6 @@ if __name__=="__main__":
             dxRobot = 0.
             dyRobot = 0.
             
-            gui.save("images/%06d.png"%it)
-            
             if it % matlabSlowFactor == 0:
                subIterActivePlaceCells.sort()
                iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
@@ -154,6 +154,10 @@ if __name__=="__main__":
                 lastBumpCounter = robot.rif.bumpCounter
 
             for i in xrange(nSubIters):
+                if time.time() > nextImgTime:
+                    gui.save("images/%06d.png"%iimg)
+                    nextImgTime += Dt
+                    iimg += 1
                 slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
                 subIterActivePlaceCells += slam.getActivePlaceCells()
