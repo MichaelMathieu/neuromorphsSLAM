@@ -65,10 +65,10 @@ if __name__=="__main__":
         kvInterface.setQuitCmd(False)
         ctrl = controller.remoteController(gui, obstacles, kvInterface)
     else:
-        ctrl = controller.guiController(gui, obstacles)
+        ctrl = controller.guiController(gui, obstacles, speed = 0.1)
     
     
-    noise = 0.3
+    noise = 0.15
     x_0 = 0.1
     y_0 = 0.1
     th0 = 0
@@ -161,6 +161,7 @@ if __name__=="__main__":
                     robot.update(dxRobot,dyRobot)
                     dxRobot = 0.
                     dyRobot = 0.
+            robot.update(dxRobot,dyRobot)
             it += 1
                 
     except KeyboardInterrupt:

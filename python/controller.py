@@ -37,8 +37,8 @@ class guiController(controllerAbstraction):
       self.theta += random.gauss(0, robot.noise)
       nCollisions = 0
       theta0 = self.theta
-      for x1, y1, x2, y2 in self.obstacles:
-         nCollisions += self.avoidLine(x1, y1, x2, y2, dt, robot, True)
+      #for x1, y1, x2, y2 in self.obstacles:
+         #nCollisions += self.avoidLine(x1, y1, x2, y2, dt, robot, True)
       if nCollisions > 1:
          self.theta = theta0 + math.pi
          print "Virtual Obstacle"

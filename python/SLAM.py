@@ -101,7 +101,8 @@ class SLAM():
         connections = [(i,j,weight*W) for (i,j,weight) in connections]
         #print connections
         placeCellId = len(self.placeCells)
-        self.placeCells.append(PlaceCell(connections, R=50, C=1, V_th=9, x=x, y=y, placeCellId = placeCellId))
+        self.placeCells.append(PlaceCell(connections, R=50, C=1, V_th=6., abs_ref = 0.001,
+                                         x=x, y=y, placeCellId = placeCellId))
         print "New place cell "
         
     def update(self, dx, dy, dt, robot = None, gui = None):
