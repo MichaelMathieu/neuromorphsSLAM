@@ -148,7 +148,7 @@ if __name__=="__main__":
             if robot.rif:
                 if lastBumpCounter >= robot.rif.bumpCounter:
                     print "We have no incoming bump stream!!!!"
-                    robot.rif.setBumpStream(10)
+                    #robot.rif.setBumpStream(10)
                 lastBumpCounter = robot.rif.bumpCounter
 
             for i in xrange(nSubIters):
@@ -157,7 +157,7 @@ if __name__=="__main__":
                 subIterActivePlaceCells += slam.getActivePlaceCells()
                 dxRobot += dx
                 dyRobot += dy
-                if i % 10 == 0:
+                if i % 40 == 0:
                     robot.update(dxRobot,dyRobot)
                     dxRobot = 0.
                     dyRobot = 0.
