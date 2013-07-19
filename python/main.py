@@ -68,7 +68,7 @@ if __name__=="__main__":
         ctrl = controller.guiController(gui, obstacles)
     
     
-    noise = 0.05
+    noise = 0.3
     x_0 = 0.1
     y_0 = 0.1
     th0 = 0

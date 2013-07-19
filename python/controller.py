@@ -47,7 +47,8 @@ class guiController(controllerAbstraction):
       if any(new_bumps):
          bumps = [a or b for a,b in zip(new_bumps,robot.getBumps())]
          beta = robot.getBumpAngle(bumps)
-         self.theta = 2*beta-math.pi-self.theta_before_bump
+         #self.theta = 2*beta-math.pi-self.theta_before_bump
+         self.theta = math.pi+self.theta_before_bump
          bumpFactor = 10.
          newPlaceCell = True
          print "Bump Sensed", self.theta_before_bump
