@@ -18,11 +18,11 @@ class keyValueInterface(StreamClient):
       self.set(self.quitKey, json.dumps(bool(quitCmd)))
 
    def setPosition(self, posX, posY):
-      self.set(self.positionKey, "X=%f Y=%f" % ( posX, posY ))    
+      self.set(self.positionKey, "X=%f Y=%f" % ( posX, 1 - posY ))    
       #print "Set Position X=%f Y%f" % (posX, posY)
    
    def setPlaceCellPositions(self, positionMatrix):
-      print "Set place cell positions ", positionMatrix
+      #print "Set place cell positions ", positionMatrix
       self.set(self.placeCellPositionKey, json.dumps(positionMatrix))    
    def setPlaceCellStatus(self, placeCellStatusRaw):
       placeCellStatus = json.dumps(placeCellStatusRaw)
@@ -31,16 +31,21 @@ class keyValueInterface(StreamClient):
   
 if __name__ == "__main__":
    import time
-   k = keyValueInterface("10.1.95.75", 21567, "slam")
+   k = keyValueInterface("10.1.95.82", 21567, "slam")
    
    k.set('slam/velocity', 'dx=0.1 dy=0.000')
    print "set velocity"
-   for i in range(1000):
-      value = k.get('slam/velocity')
-      print value
-      time.sleep(0.1)
+   for i in range(1000000):
+      time.sleep(0.5)
+      j = 0
+      if i % 10 == 0:
+         if i % 20 == 0:
+            j = 1
+         else:
+            j = 2
+      spikes = [ fk * i / 10 for fk in range(j)  ]
       t = i % 10 + 1
-      spikes = json.dumps([int(j % t == 0) for j in range(100)])
+      spikes = json.dumps(spikes)
       print spikes
       k.set('slam/spikes', spikes)
 

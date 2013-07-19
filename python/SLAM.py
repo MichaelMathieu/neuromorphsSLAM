@@ -83,7 +83,7 @@ class SLAM():
         self.placeCellsToPut = []
 
     def newPlaceCell(self, x, y):
-        self.placeCellsToPut.append((self.it+self.winSize/2, x, y))
+        self.placeCellsToPut.append((self.it+self.winSize/2, x, 1-y))
 
     def newPlaceCellDephased(self, x, y ):
         w = [xx.sum(1) for xx in self.gridCellsSpikes]

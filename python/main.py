@@ -105,7 +105,9 @@ if __name__=="__main__":
     nSubIters = 75
     Dt = 0.25
     nextTime = time.time()+Dt
-    
+    # Matlab is having trouble keeping up so we need to aggregate our spiking data over more iterations.  Don't actually need to change our iteration times.
+    matlabSlowFactor = 3
+    subIterActivePlaceCells = []
     lastBump = False
     it = 0
     lastBumpCounter = -1
@@ -132,13 +134,23 @@ if __name__=="__main__":
             dxRobot = 0.
             dyRobot = 0.
             
+            if it % matlabSlowFactor == 0:
+               subIterActivePlaceCells.sort()
+               iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
+
+               subIterActivePlaceCells = []
+               matlabIter = matlabSlowFactor
+               if kvInterface:
+                  kvInterface.setPlaceCellStatus(iterActivePlaceCells)
+                  placeCellPositions = [ (p.x, p.y) for p in slam.placeCells]
+                  kvInterface.setPlaceCellPositions(placeCellPositions)
+                  print "Sending spikes: ", iterActivePlaceCells
             if robot.rif:
                 if lastBumpCounter >= robot.rif.bumpCounter:
                     print "We have no incoming bump stream!!!!"
                     #robot.rif.setBumpStream(10)
                 lastBumpCounter = robot.rif.bumpCounter
 
-            subIterActivePlaceCells = []
             for i in xrange(nSubIters):
                 slam.update(dx, dy, dt/5, robot, gui)
                 placeCellCreation(slam)
@@ -149,12 +161,6 @@ if __name__=="__main__":
                     robot.update(dxRobot,dyRobot)
                     dxRobot = 0.
                     dyRobot = 0.
-            subIterActivePlaceCells.sort()
-            iterActivePlaceCells = [ key for key,_ in groupby(subIterActivePlaceCells) ]
-            if kvInterface:
-                kvInterface.setPlaceCellStatus(iterActivePlaceCells)
-                placeCellPositions = [ (p.x, p.y) for p in slam.placeCells]
-                kvInterface.setPlaceCellPositions(placeCellPositions)
             it += 1
                 
     except KeyboardInterrupt:
